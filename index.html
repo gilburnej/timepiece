@@ -4,17 +4,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
 <style>
-  /* Layout: one night sky. Title and readouts sit above it, the timeline sits below. The look is intentionally dark only. */
+  /* Layout: the sky is one canvas behind the whole page. Title and readouts float over it at the top, the timeline at the bottom. Dark only, on purpose. */
   :root {
-    --sky: #060a14;
-    --sky-2: #0d1528;
+    --sky: #04070f;
+    --sky-2: #0b1324;
     --star: #fff3d6;
     --newhire: #bcd3ff;
     --ember: #e9a25c;
     --ink: #e7e9f0;
     --muted: #8a93ab;
-    --line: rgba(160, 178, 220, 0.16);
-    --panel: rgba(13, 21, 40, 0.72);
+    --line: rgba(160, 178, 220, 0.18);
+    --panel: rgba(8, 13, 26, 0.78);
     --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
     --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -22,6 +22,8 @@
   }
   html, body { height: 100%; }
   body {
+    position: relative;
+    margin: 0;
     background: var(--sky);
     color: var(--ink);
     font-family: var(--font-body);
@@ -31,16 +33,21 @@
     flex-direction: column;
     padding-inline: 16px;
     box-sizing: border-box;
+    overflow-x: hidden;
   }
+  #sky { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+  header, main, footer { position: relative; z-index: 1; }
   header {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: 16px 32px;
-    padding-block: 20px 8px;
+    padding-block: 20px 0;
+    pointer-events: none;
   }
-  .intro { max-width: 46ch; min-width: 0; }
+  header > * { pointer-events: auto; }
+  .intro { max-width: 44ch; min-width: 0; }
   h1 {
     font-family: var(--font-display);
     font-style: italic;
@@ -50,8 +57,8 @@
     margin: 0 0 8px;
     letter-spacing: 0.01em;
   }
-  .intro p { margin: 0; color: var(--muted); text-wrap: pretty; }
-  .readout { display: grid; gap: 10px; min-width: min(300px, 100%); }
+  .intro p { margin: 0; color: var(--muted); text-wrap: pretty; text-shadow: 0 0 12px var(--sky); }
+  .readout { display: grid; gap: 10px; min-width: min(320px, 100%); }
   .date {
     font-family: var(--font-data);
     font-size: 22px;
@@ -64,46 +71,47 @@
     font-family: var(--font-data); font-size: 11px; letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--muted);
   }
-  .meter .bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .meter .bar { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
   .meter .fill { height: 100%; width: 100%; border-radius: 2px; }
   #fillPos { background: var(--newhire); }
   #fillExp { background: var(--star); }
   .meter output { font-family: var(--font-data); font-variant-numeric: tabular-nums; text-align: right; }
   .yrs { font-family: var(--font-data); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-  main { flex: 1; position: relative; min-height: 420px; }
-  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  main { flex: 1; min-height: 380px; }
   #tip {
-    position: absolute; pointer-events: none; background: var(--panel);
+    position: absolute; z-index: 2; pointer-events: none; background: var(--panel);
     border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
     font-family: var(--font-data); font-size: 12px; line-height: 1.5;
     backdrop-filter: blur(6px); max-width: 260px;
   }
   #tip b { font-family: var(--font-body); font-weight: 500; font-size: 13px; display: block; margin-bottom: 2px; }
 
-  footer { padding-block: 8px 20px; display: grid; gap: 12px; }
+  footer { padding-block: 0 20px; display: grid; gap: 12px; }
   .caption {
-    min-height: 3em; max-width: 80ch; color: var(--ink);
+    min-height: 3em; max-width: 72ch; color: var(--ink);
     font-family: var(--font-display); font-style: italic; font-size: 19px; line-height: 1.35;
+    text-shadow: 0 0 14px var(--sky), 0 0 4px var(--sky);
+    transition: opacity 0.6s;
   }
   .caption small { display: block; font-family: var(--font-data); font-style: normal; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ember); margin-bottom: 2px; }
   .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
   button, .seg label {
     font: 500 12px/1 var(--font-data); letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--ink); background: transparent; border: 1px solid var(--line);
+    color: var(--ink); background: rgba(4, 7, 15, 0.5); border: 1px solid var(--line);
     border-radius: 999px; padding: 9px 14px; cursor: pointer;
   }
   button:hover, .seg label:hover { border-color: var(--muted); }
   button:focus-visible, input:focus-visible + label, input[type=range]:focus-visible { outline: 2px solid var(--newhire); outline-offset: 2px; }
   #play { min-width: 7.5em; }
-  .track { flex: 1 1 360px; min-width: 0; position: relative; padding-bottom: 18px; }
+  .track { flex: 1 1 320px; min-width: 0; position: relative; padding-bottom: 18px; }
   input[type=range] { width: 100%; accent-color: var(--star); margin: 0; }
   .ticks { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; font-family: var(--font-data); font-size: 10px; color: var(--muted); }
   .ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
   .ticks span:first-child { transform: none; }
   .ticks span.end { transform: translateX(-100%); }
   .ticks i { position: absolute; top: -20px; width: 2px; height: 6px; background: var(--ember); transform: translateX(-1px); border-radius: 1px; }
-  .seg { display: flex; gap: 0; }
+  .seg { display: flex; }
   .seg input { position: absolute; opacity: 0; pointer-events: none; }
   .seg label { border-radius: 0; }
   .seg label:first-of-type { border-radius: 999px 0 0 999px; }
@@ -111,7 +119,7 @@
   .seg input:checked + label { background: var(--ink); color: var(--sky); border-color: var(--ink); }
   .seg-title { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 
-  details { color: var(--muted); max-width: 80ch; }
+  details { color: var(--muted); max-width: 80ch; background: var(--panel); border-radius: 6px; padding: 6px 10px; justify-self: start; }
   summary { cursor: pointer; font-family: var(--font-data); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
   details p, details li { text-wrap: pretty; }
   details ul { padding-left: 1.2em; margin: 6px 0; }
@@ -119,14 +127,29 @@
   .legend span { display: inline-flex; align-items: center; gap: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
+  /* Gallery: everything but the sky, the date and the caption goes away. */
+  #exitGallery { position: fixed; right: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); z-index: 3; transition: opacity 0.5s; }
+  body.gallery { cursor: none; }
+  body.gallery.awake { cursor: auto; }
+  body.gallery .intro p, body.gallery .readout .meter, body.gallery .yrs,
+  body.gallery .controls, body.gallery details { display: none; }
+  body.gallery h1 { font-size: 28px; opacity: 0.55; }
+  body.gallery header { align-items: baseline; }
+  body.gallery .date { font-size: 18px; opacity: 0.7; }
+  body.gallery footer { padding-block: 0 48px; justify-items: center; text-align: center; }
+  body.gallery .caption { font-size: clamp(20px, 2.4vw, 30px); max-width: 44ch; min-height: 4.2em; }
+  body:not(.gallery) #exitGallery, body.gallery:not(.awake) #exitGallery { opacity: 0; pointer-events: none; }
+  #fade { position: fixed; inset: 0; background: var(--sky); opacity: 0; pointer-events: none; z-index: 4; transition: opacity 2s; }
+
   @media (max-width: 640px) {
-    body { height: auto; }
-    main { min-height: 150vw; }
+    body { height: auto; min-height: 100%; }
+    main { min-height: 205vw; }
     .meter { grid-template-columns: 7.5em 1fr 3.2em; }
     .ticks .minor { display: none; }
   }
 </style>
 
+<canvas id="sky" aria-label="Night sky of agency constellations"></canvas>
 <header>
   <div class="intro">
     <h1>Slow Light</h1>
@@ -140,10 +163,8 @@
   </div>
 </header>
 
-<main>
-  <canvas id="sky" aria-label="Night sky of agency constellations"></canvas>
-  <div id="tip" hidden></div>
-</main>
+<main id="field"></main>
+<div id="tip" hidden></div>
 
 <footer>
   <div class="caption" id="caption"></div>
@@ -158,6 +179,7 @@
       <input type="radio" name="scn" id="scnRefill" value="refill" checked><label for="scnRefill">Refill every vacancy</label>
       <input type="radio" name="scn" id="scnHold" value="hold"><label for="scnHold">No refill</label>
     </div>
+    <button id="gallery" type="button" title="Loops on its own. Press G or Esc to leave.">Gallery mode</button>
   </div>
   <details>
     <summary>Key, data and assumptions</summary>
@@ -169,14 +191,18 @@
     </div>
     <ul>
       <li><b>This is a sketch, not a dataset.</b> The figures are rough approximations from published reporting (GAO, Partnership for Public Service, Pew, agency announcements, and for ACF, tallies by former staff). Before you show it, check each one against OPM's workforce data and edit the <code>EVENTS</code> block in the source.</li>
-      <li>Each constellation has 36 stars, so one star is about 2.8% of that agency. Totals at Jan 2026: Forest Service, Park Service, CDC and IRS each down about 26–27%. TSA down about 3%, FAA about 3%.</li>
+      <li>Each constellation has 36 stars, so one star is about 2.8% of that agency. The bright stars joined by lines trace the figure. The looser stars around it belong to the same agency. Totals at Jan 2026: Forest Service, Park Service, CDC and IRS each down about 26–27%. TSA and FAA each down about 3%.</li>
+      <li>The lines between stars show positions. A line is drawn when both of its stars are filled, so the shape returns as soon as people are hired. Brightness shows experience, which returns one year at a time.</li>
       <li>Experience per star is estimated from an assumed average tenure for each agency. Probationary firings remove the newest stars. Deferred resignations and early retirements remove the most experienced. RIFs pick stars at random.</li>
       <li>Reinstated staff return at full brightness (the October 2025 RIFs, reversed in November; NIOSH reinstatements in January 2026). New hires, such as the IRS seasonal hires, return faint.</li>
-      <li>The ACF Social Services Block Grant team is the small separate cluster. Everyone with that expertise left, so it stays dark even when every other vacancy is refilled.</li>
+      <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark even when every other vacancy is refilled.</li>
       <li>"Refill every vacancy" is hypothetical. It shows how long full recovery would take in the best case: every empty position filled by July 2026, with no further cuts.</li>
+      <li>Gallery mode plays the full timeline on a loop, pausing on each event. Add <code>#gallery</code> to the end of the address to open straight into it.</li>
     </ul>
   </details>
 </footer>
+<button id="exitGallery" type="button">Exit gallery</button>
+<div id="fade"></div>
 
 <script>
 /* ===================================================================
@@ -232,6 +258,15 @@ const EVENTS = [
 ];
 /* ============================ end data ============================ */
 
+/* Where each constellation sits in the sky: [x, y] inside the open sky area, size, rotation (radians).
+   'wide' is for landscape screens (size in units of sky height); 'tall' for portrait (units of sky width). */
+const PLACES = {
+  wide: { fs: [.08, .40, .56, -.10], cdc: [.22, .17, .40, .18], nps: [.27, .67, .46, .08], irs: [.43, .36, .56, -.06],
+          faa: [.59, .68, .46, .38], acf: [.67, .22, .44, .05], niosh: [.81, .62, .42, -.12], tsa: [.93, .28, .40, .07] },
+  tall: { fs: [.27, .06, .36, -.10], cdc: [.75, .13, .30, .18], irs: [.28, .32, .40, -.06], acf: [.72, .40, .32, .05],
+          nps: [.26, .58, .34, .08], faa: [.74, .65, .34, .38], niosh: [.28, .84, .34, -.12], tsa: [.74, .90, .30, .07] },
+};
+
 const START = new Date(2024, 8, 1);           // Sep 2024
 const END_M = 256;                            // months -> Jan 2046
 const SPLIT_M = 22, SPLIT_U = 0.45;           // first 45% of the slider covers Sep 2024–Jul 2026
@@ -243,39 +278,54 @@ const fmt = m => { const d = new Date(START.getFullYear(), START.getMonth() + Ma
 EVENTS.forEach(e => e.m = monthOf(e.date));
 
 function rng(seed) { let s = 0; for (const c of seed) s = (s * 31 + c.charCodeAt(0)) >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const gauss = r => (r() + r() + r() + r() - 2) / 1.15;
 
-// Lay out stars along each figure: vertices first, the rest spread by segment length.
-function placeStars(paths, n) {
-  const segs = [], pts = [];
-  paths.forEach((p, pi) => {
-    const closed = p.length > 2 && p[0][0] === p.at(-1)[0] && p[0][1] === p.at(-1)[1];
-    const verts = closed ? p.slice(0, -1) : p;
-    verts.forEach(v => pts.push({ x: v[0], y: v[1] }));
-    for (let i = 0; i < p.length - 1; i++) segs.push({ a: p[i], b: p[i + 1], len: Math.hypot(p[i+1][0]-p[i][0], p[i+1][1]-p[i][1]), k: 0 });
-  });
-  let left = n - pts.length;
-  const total = segs.reduce((s, g) => s + g.len, 0);
-  segs.forEach(g => { g.k = Math.floor(left * g.len / total); });
-  let rem = left - segs.reduce((s, g) => s + g.k, 0);
-  [...segs].sort((a, b) => b.len - a.len).forEach(g => { if (rem > 0) { g.k++; rem--; } });
-  segs.forEach(g => { for (let j = 1; j <= g.k; j++) { const f = j / (g.k + 1); pts.push({ x: g.a[0] + (g.b[0]-g.a[0]) * f, y: g.a[1] + (g.b[1]-g.a[1]) * f }); } });
-  return pts.slice(0, n);
+/* Build each figure the way real constellations look: the vertices are the bright named stars joined by lines,
+   and the rest of the agency's stars scatter loosely around the figure. Lines are stored as star index pairs. */
+function buildFigure(paths, n, r, isCluster) {
+  const stars = [], links = [], segs = [];
+  const near = (x, y) => stars.findIndex(s => s.anchor && Math.hypot(s.ux - x, s.uy - y) < 1e-6);
+  const jit = isCluster ? 0.01 : 0.025;
+  for (const p of paths) {
+    let prev = -1;
+    for (const v of p) {
+      let i = near(v[0], v[1]);
+      if (i < 0) { i = stars.length; stars.push({ ux: v[0], uy: v[1], x: v[0] + gauss(r) * jit, y: v[1] + gauss(r) * jit, anchor: true }); }
+      if (prev >= 0) { links.push([prev, i]); segs.push([stars[prev], stars[i]]); }
+      prev = i;
+    }
+  }
+  const lens = segs.map(([a, b]) => Math.hypot(b.x - a.x, b.y - a.y)), total = lens.reduce((a, b) => a + b, 0);
+  while (stars.length < n) {
+    let k = r() * total, j = 0; while (k > lens[j] && j < lens.length - 1) k -= lens[j++];
+    const [a, b] = segs[j], f = r(), dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+    const off = gauss(r) * 0.075;
+    stars.push({ x: a.x + dx * f - dy / L * off, y: a.y + dy * f + dx / L * off, anchor: false });
+  }
+  return { stars: stars.slice(0, n), links };
 }
 
 // Build the sky
 const groups = [];
 AGENCIES.forEach(a => {
   const r = rng(a.id);
-  const mk = (gid, name, n, paths, noRefill) => {
-    const stars = placeStars(paths, n).map(p => {
+  const mk = (gid, name, n, paths, noRefill, isCluster) => {
+    const fig = buildFigure(paths, n, r, isCluster);
+    fig.stars.forEach(s => {
       const e = a.tenure + (r() + r() + r() - 1.5) * a.tenure * 0.95;
-      return { ...p, exp0: Math.min(MAX_EXP, Math.max(0.5, e)), disp: 0, wasOn: true, tw: r() * 6.28 };
+      Object.assign(s, { exp0: Math.min(MAX_EXP, Math.max(0.5, e)), disp: 0, wasOn: true, tw: r() * 6.28 });
     });
-    groups.push({ key: gid, agency: a, name, paths, stars, noRefill, people: a.staff / STARS });
+    // the anchors should be the brightest stars of the figure, like the named stars of a real constellation
+    const byExp = [...fig.stars].sort((p, q) => q.exp0 - p.exp0).map(s => s.exp0);
+    const anchors = fig.stars.filter(s => s.anchor), loose = fig.stars.filter(s => !s.anchor);
+    if (!isCluster) { anchors.forEach((s, i) => s.exp0 = byExp[i]); loose.forEach((s, i) => s.exp0 = byExp[anchors.length + i]); }
+    groups.push({ key: gid, agency: a, name, stars: fig.stars, links: fig.links, noRefill, people: a.staff / STARS });
   };
-  mk(a.id, a.name, STARS, a.paths, false);
-  if (a.extra) mk(a.id + ':' + a.extra.id, a.extra.name, a.extra.stars, a.extra.paths, a.extra.noRefill);
+  mk(a.id, a.name, STARS, a.paths, false, false);
+  if (a.extra) mk(a.id + ':' + a.extra.id, a.extra.name, a.extra.stars, a.extra.paths, a.extra.noRefill, true);
 });
+// shuffle loose-star experience so the brightest aren't always on the same side, but keep anchors bright
+groups.forEach(g => { const r = rng(g.key + 'mix'), loose = g.stars.filter(s => !s.anchor); for (let i = loose.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [loose[i].exp0, loose[j].exp0] = [loose[j].exp0, loose[i].exp0]; } });
 const byKey = Object.fromEntries(groups.map(g => [g.key, g]));
 const baseExp = groups.reduce((s, g) => s + g.stars.reduce((t, st) => t + st.exp0 * g.people, 0), 0);
 
@@ -316,121 +366,189 @@ function simulate(t, scenario) {
   }
   return { filled: filled / total, exp: exp / baseExp, years: exp };
 }
+const lum = s => s.on ? 0.12 + 0.88 * Math.pow(s.exp / MAX_EXP, 0.75) : 0;
 
-// ---------- rendering ----------
+// ---------- the sky ----------
 const cv = document.getElementById('sky'), ctx = cv.getContext('2d');
-const tip = document.getElementById('tip');
-let W = 0, H = 0, DPR = 1, field = [], embers = [];
+const tip = document.getElementById('tip'), fieldEl = document.getElementById('field');
+let W = 0, H = 0, DPR = 1, bg = null, twinklers = [], embers = [];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const C = { star: css('--star'), nh: css('--newhire'), ember: css('--ember'), ink: css('--ink'), muted: css('--muted'), sky2: css('--sky-2') };
+const C = { star: css('--star'), nh: css('--newhire'), ember: css('--ember'), ink: css('--ink'), muted: css('--muted'), sky: css('--sky'), sky2: css('--sky-2') };
+const TINTS = ['#c9d8ff', '#e4ebff', '#ffffff', '#fff4e2', '#ffe2bd', '#ffc99a'];
 
-function resize() {
-  const r = cv.getBoundingClientRect();
-  DPR = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height;
-  cv.width = W * DPR; cv.height = H * DPR;
-  const rr = rng('field');
-  field = Array.from({ length: Math.round(W * H / 2600) }, () => ({ x: rr() * W, y: rr() * H, r: rr() * 0.9 + 0.2, a: rr() * 0.35 + 0.05, tw: rr() * 6.28 }));
-  const main = groups.filter(g => !g.key.includes(':'));
-  const cols = W < 640 ? 2 : 4, rows = Math.ceil(main.length / cols);
-  const cw = W / cols, ch = H / rows, size = Math.min(cw * 0.62, ch * 0.62);
-  main.forEach((g, i) => {
-    const cx = (i % cols + 0.5) * cw, cy = (Math.floor(i / cols) + 0.44) * ch;
-    g.box = { x: cx - size / 2, y: cy - size / 2, s: size, cx, cy, cell: { x: cx - cw / 2, y: cy - ch * 0.44, w: cw, h: ch } };
-    const ex = byKey[g.key + ':ssbg']; if (ex) ex.box = g.box;
-  });
+// Paint the still part of the sky once per resize: gradient, Milky Way haze, dust lanes and thousands of faint stars.
+function paintBackground() {
+  bg = document.createElement('canvas'); bg.width = W * DPR; bg.height = H * DPR;
+  const b = bg.getContext('2d'); b.scale(DPR, DPR);
+  const r = rng('sky'), M = Math.min(W, H);
+  const grd = b.createLinearGradient(0, 0, 0, H);
+  grd.addColorStop(0, C.sky); grd.addColorStop(0.65, C.sky2); grd.addColorStop(1, '#141a2c');
+  b.fillStyle = grd; b.fillRect(0, 0, W, H);
+  // the band runs corner to corner on a gentle curve
+  const band = f => { const x = -0.1 * W + f * 1.2 * W, y = H * (0.92 - 0.8 * f) + Math.sin(f * 3.1) * H * 0.06; return [x, y]; };
+  const nrm = (() => { const [x1, y1] = band(0), [x2, y2] = band(1), L = Math.hypot(x2 - x1, y2 - y1); return [-(y2 - y1) / L, (x2 - x1) / L]; })();
+  b.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 420; i++) {
+    const [x, y] = band(r()), o = gauss(r) * M * 0.09, rad = M * (0.03 + r() * 0.11);
+    const cx = x + nrm[0] * o, cy = y + nrm[1] * o;
+    const g = b.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    const warm = r() < 0.3;
+    g.addColorStop(0, warm ? 'rgba(190,165,150,0.022)' : 'rgba(120,140,200,0.026)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    b.fillStyle = g; b.beginPath(); b.arc(cx, cy, rad, 0, 6.283); b.fill();
+  }
+  b.globalCompositeOperation = 'source-over';
+  for (let i = 0; i < 90; i++) {   // dust lanes
+    const [x, y] = band(r()), o = gauss(r) * M * 0.03, rad = M * (0.015 + r() * 0.05);
+    const cx = x + nrm[0] * o, cy = y + nrm[1] * o, g = b.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    g.addColorStop(0, 'rgba(4,7,15,0.22)'); g.addColorStop(1, 'rgba(4,7,15,0)');
+    b.fillStyle = g; b.beginPath(); b.arc(cx, cy, rad, 0, 6.283); b.fill();
+  }
+  // stars: dense along the band, sparse elsewhere; magnitudes follow a steep power law so most are faint
+  const n = Math.round(W * H / 260);
+  twinklers = [];
+  for (let i = 0; i < n; i++) {
+    let x, y;
+    if (r() < 0.55) { const [bx, by] = band(r()), o = gauss(r) * M * 0.11; x = bx + nrm[0] * o; y = by + nrm[1] * o; }
+    else { x = r() * W; y = r() * H; }
+    const m = Math.pow(r(), 7), rad = 0.25 + m * 1.4, a = 0.1 + m * 0.6 + r() * 0.1;
+    const col = TINTS[Math.floor(r() * TINTS.length)];
+    if (m > 0.18 && twinklers.length < 260) { twinklers.push({ x, y, rad, a, col, tw: r() * 6.28, sp: 600 + r() * 900 }); continue; }
+    b.fillStyle = hexA(col, a); b.beginPath(); b.arc(x, y, rad, 0, 6.283); b.fill();
+  }
 }
 
-function draw(now, dt, t) {
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  const grd = ctx.createRadialGradient(W * 0.5, H * 1.1, 0, W * 0.5, H * 1.1, Math.max(W, H));
-  grd.addColorStop(0, C.sky2); grd.addColorStop(1, 'rgba(6,10,20,1)');
-  ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-  for (const f of field) {
-    const a = reduceMotion ? f.a : f.a * (0.75 + 0.25 * Math.sin(now / 900 + f.tw));
-    ctx.fillStyle = `rgba(220,226,245,${a})`; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.283); ctx.fill();
-  }
-  const fontPx = Math.max(10, Math.min(12, W / 90));
+function layout() {
+  cv.style.height = '0px';
+  const body = document.body.getBoundingClientRect();
+  W = Math.max(document.documentElement.clientWidth, body.width); H = Math.max(window.innerHeight, document.body.scrollHeight);
+
+  cv.style.height = H + 'px';
+  DPR = Math.min(2, devicePixelRatio || 1); cv.width = W * DPR; cv.height = H * DPR;
+  const f = fieldEl.getBoundingClientRect(), fx = f.left - body.left, fy = f.top - body.top + 10, fw = f.width, fh = f.height - 30;
+  const wide = fw / fh >= 1.5, P = wide ? PLACES.wide : PLACES.tall;
+  const unit = wide ? Math.min(fh, fw / 2.5) : Math.min(fw, fh / 1.9);
   for (const g of groups) {
-    const b = g.box, P = s => [b.x + s.x * b.s, b.y + s.y * b.s], scale = Math.min(1, b.s / 200);
-    // figure lines: the shape persists even when stars are out
-    ctx.strokeStyle = 'rgba(160,178,220,0.13)'; ctx.lineWidth = 1;
-    for (const p of g.paths) { ctx.beginPath(); p.forEach((v, i) => { const x = b.x + v[0] * b.s, y = b.y + v[1] * b.s; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); }
+    const [px, py, sz, rot] = P[g.agency.id], size = sz * unit;
+    const cx = fx + px * fw, cy = fy + py * fh, cs = Math.cos(rot), sn = Math.sin(rot);
+    g.box = { cx, cy, size };
+    g.scale = Math.max(0.7, Math.min(1.25, size / 220));
+    for (const s of g.stars) { const dx = (s.x - 0.5) * size, dy = (s.y - 0.5) * size; s.sx = cx + dx * cs - dy * sn; s.sy = cy + dx * sn + dy * cs; }
+    if (!g.key.includes(':')) g.labelY = Math.max(...g.stars.filter(s => s.anchor).map(s => s.sy)) + 24;
+  }
+  paintBackground();
+}
+
+function drawStar(x, y, b, col, scale, now, tw) {
+  const flick = reduceMotion ? 1 : 0.9 + 0.1 * Math.sin(now / 650 + tw);
+  const a = b * flick, rad = (0.45 + b * 2.1) * scale;
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, rad * 4.5);
+  glow.addColorStop(0, hexA(col, a * 0.42)); glow.addColorStop(1, hexA(col, 0));
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, rad * 4.5, 0, 6.283); ctx.fill();
+  ctx.fillStyle = hexA(col, Math.min(1, a + 0.2)); ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill();
+  if (b > 0.62) {      // faint diffraction spikes on the brightest stars
+    const L = rad * (3 + b * 5);
+    ctx.strokeStyle = hexA(col, a * 0.22); ctx.lineWidth = 0.6;
+    ctx.beginPath(); ctx.moveTo(x - L, y); ctx.lineTo(x + L, y); ctx.moveTo(x, y - L); ctx.lineTo(x, y + L); ctx.stroke();
+  }
+}
+
+function draw(now, dt) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.drawImage(bg, 0, 0, W, H);
+  for (const s of twinklers) {
+    const a = reduceMotion ? s.a : s.a * (0.6 + 0.4 * Math.sin(now / s.sp + s.tw));
+    ctx.fillStyle = hexA(s.col, a); ctx.beginPath(); ctx.arc(s.x, s.y, s.rad, 0, 6.283); ctx.fill();
+  }
+  const gallery = document.body.classList.contains('gallery');
+  for (const g of groups) {
     for (const s of g.stars) {
-      const [x, y] = P(s);
-      const target = s.on ? 0.14 + 0.86 * Math.sqrt(s.exp / MAX_EXP) : 0;
-      const k = target < s.disp ? 10 : 4;
+      const target = lum(s), k = target < s.disp ? 10 : 4;
       s.disp += (target - s.disp) * Math.min(1, dt * k);
-      if (s.wasOn && !s.on) embers.push({ x, y, t0: now });
+      if (s.wasOn && !s.on) embers.push({ x: s.sx, y: s.sy, t0: now });
       s.wasOn = s.on;
+    }
+    // figure lines mean filled positions: drawn when both ends are staffed, regardless of experience
+    for (const [i, j] of g.links) {
+      const a = g.stars[i], b = g.stars[j], both = a.on && b.on;
+      ctx.strokeStyle = both ? 'rgba(170,188,230,0.26)' : 'rgba(170,188,230,0.045)';
+      ctx.lineWidth = 0.8; ctx.setLineDash(both ? [] : [2, 4]);
+      const dx = b.sx - a.sx, dy = b.sy - a.sy, L = Math.hypot(dx, dy) || 1, gap = 5 * g.scale;
+      ctx.beginPath(); ctx.moveTo(a.sx + dx / L * gap, a.sy + dy / L * gap); ctx.lineTo(b.sx - dx / L * gap, b.sy - dy / L * gap); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    for (const s of g.stars) {
       if (s.disp < 0.02) {
-        ctx.setLineDash([2, 3]); ctx.strokeStyle = 'rgba(138,147,171,0.35)';
-        ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
+        if (s.anchor) { ctx.strokeStyle = 'rgba(138,147,171,0.3)'; ctx.setLineDash([1.5, 2.5]); ctx.beginPath(); ctx.arc(s.sx, s.sy, 2.6 * g.scale, 0, 6.283); ctx.stroke(); ctx.setLineDash([]); }
+        else { ctx.fillStyle = 'rgba(138,147,171,0.18)'; ctx.beginPath(); ctx.arc(s.sx, s.sy, 0.7, 0, 6.283); ctx.fill(); }
         continue;
       }
-      const tw = reduceMotion ? 1 : 0.92 + 0.08 * Math.sin(now / 700 + s.tw);
-      const a = s.disp * tw, rad = (1.2 + s.disp * 3.4) * scale;
       const isNew = s.hireM !== null && s.exp < s.exp0 - 0.01;
-      const col = isNew ? C.nh : C.star;
-      const glow = ctx.createRadialGradient(x, y, 0, x, y, rad * 5);
-      glow.addColorStop(0, hexA(col, a * 0.55)); glow.addColorStop(1, hexA(col, 0));
-      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, rad * 5, 0, 6.283); ctx.fill();
-      ctx.fillStyle = hexA(col, Math.min(1, a + 0.15)); ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.283); ctx.fill();
+      drawStar(s.sx, s.sy, s.disp, isNew ? C.nh : C.star, g.scale, now, s.tw);
     }
     if (!g.key.includes(':')) {
-      ctx.textAlign = 'center'; ctx.font = `500 ${fontPx + 1}px "IBM Plex Sans", system-ui, sans-serif`; ctx.fillStyle = C.ink;
-      const ly = b.y + b.s + 22;
-      ctx.fillText(g.name, b.cx, ly);
-      ctx.font = `${fontPx}px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = C.muted;
-      const two = ctx.measureText('100% filled · 100% experience').width > b.cell.w - 8;
+      // labels set like a star atlas: small italic, letterspaced, quiet
+      const fs = Math.round(Math.max(13, Math.min(17, g.box.size / 13)));
+      ctx.textAlign = 'center'; ctx.font = `italic 400 ${fs}px "Cormorant Garamond", Georgia, serif`;
+      if ('letterSpacing' in ctx) ctx.letterSpacing = '0.06em';
+      ctx.fillStyle = 'rgba(214,222,240,0.6)';
+      ctx.fillText(g.name, g.box.cx, g.labelY);
+      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+      if (!gallery) {
+        ctx.font = `10px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = 'rgba(138,147,171,0.75)';
+        ctx.fillText(`${Math.round(g.filled / g.stars.length * 100)}% filled · ${Math.round(g.exp / g.base * 100)}% exp.`, g.box.cx, g.labelY + 15);
+      }
       const ex = byKey[g.key + ':ssbg'];
-      const fill = g.filled / g.stars.length, ep = g.exp / g.base;
-      if (two) { ctx.fillText(`${Math.round(fill * 100)}% filled`, b.cx, ly + fontPx + 6); ctx.fillText(`${Math.round(ep * 100)}% experience`, b.cx, ly + 2 * fontPx + 10); }
-      else ctx.fillText(`${Math.round(fill * 100)}% filled · ${Math.round(ep * 100)}% experience`, b.cx, ly + fontPx + 6);
-      if (ex) { ctx.textAlign = 'left'; ctx.fillText('SSBG', b.x + b.s * 0.99 + 4, b.y + b.s * 0.2); }
+      if (ex) {
+        const sx = Math.max(...ex.stars.map(s => s.sx)) + 8, sy = ex.stars.reduce((t, s) => t + s.sy, 0) / 3;
+        ctx.textAlign = 'left'; ctx.font = `italic 13px "Cormorant Garamond", Georgia, serif`; ctx.fillStyle = 'rgba(214,222,240,0.5)';
+        ctx.fillText('SSBG', sx, sy + 4);
+      }
     }
   }
-  embers = embers.filter(e => now - e.t0 < 1400);
+  embers = embers.filter(e => now - e.t0 < 1600);
   for (const e of embers) {
-    const p = (now - e.t0) / 1400;
-    ctx.strokeStyle = hexA(C.ember, (1 - p) * 0.9); ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.arc(e.x, e.y, 3 + p * 16, 0, 6.283); ctx.stroke();
-    ctx.fillStyle = hexA(C.ember, (1 - p) * 0.8); ctx.beginPath(); ctx.arc(e.x, e.y, 2.2 * (1 - p), 0, 6.283); ctx.fill();
+    const p = (now - e.t0) / 1600;
+    ctx.strokeStyle = hexA(C.ember, (1 - p) * 0.8); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(e.x, e.y, 2 + p * 14, 0, 6.283); ctx.stroke();
+    ctx.fillStyle = hexA(C.ember, (1 - p) * 0.8); ctx.beginPath(); ctx.arc(e.x, e.y, 1.8 * (1 - p), 0, 6.283); ctx.fill();
   }
 }
 function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${Math.max(0, a).toFixed(3)})`; }
 
 // ---------- timeline ----------
-const scrub = document.getElementById('scrub'), playBtn = document.getElementById('play');
+const $ = id => document.getElementById(id);
+const scrub = $('scrub'), playBtn = $('play');
 const uToM = u => u < SPLIT_U ? u / SPLIT_U * SPLIT_M : SPLIT_M + (u - SPLIT_U) / (1 - SPLIT_U) * (END_M - SPLIT_M);
 const mToU = m => m < SPLIT_M ? m / SPLIT_M * SPLIT_U : SPLIT_U + (m - SPLIT_M) / (END_M - SPLIT_M) * (1 - SPLIT_U);
-let t = 0, playing = false, scenario = 'refill', last = performance.now();
+let t = 0, playing = false, scenario = 'refill', last = performance.now(), holdUntil = 0, endAt = 0;
 
-const ticks = document.getElementById('ticks');
+const ticks = $('ticks');
 [['Sep 2024', 0], ['Jan 2025', 4], ['Jan 2026', 16], ['2030', 64], ['2035', 124], ['2040', 184], ['2045', 244]].forEach(([l, m]) => {
   const s = document.createElement('span'); s.textContent = l; s.style.left = (mToU(m) * 100) + '%';
-  if (l === '2030' || l === '2040' || l === 'Jan 2025') s.className = 'minor';
+  if (l === 'Jan 2025') return;
+  if (l === '2030' || l === '2040') s.className = 'minor';
   if (l === '2045') s.className = 'end';
   ticks.appendChild(s);
 });
+function activeEvents() { return EVENTS.filter(e => !e.scenario || e.scenario === scenario); }
 function markEvents() {
   ticks.querySelectorAll('i').forEach(n => n.remove());
-  EVENTS.filter(e => !e.scenario || e.scenario === scenario).forEach(e => {
-    const i = document.createElement('i'); i.style.left = (mToU(e.m) * 100) + '%'; i.title = e.label; ticks.appendChild(i);
-  });
+  activeEvents().forEach(e => { const i = document.createElement('i'); i.style.left = (mToU(e.m) * 100) + '%'; i.title = e.label; ticks.appendChild(i); });
 }
 markEvents();
 
-scrub.addEventListener('input', () => { t = uToM(scrub.value / 1000); });
-playBtn.addEventListener('click', () => {
-  if (!playing && t >= END_M - 0.01) t = 0;
-  playing = !playing; playBtn.textContent = playing ? 'Pause' : 'Play';
-});
+function setPlaying(p) { playing = p; playBtn.textContent = p ? 'Pause' : (t >= END_M ? 'Replay' : 'Play'); }
+scrub.addEventListener('input', () => { t = uToM(scrub.value / 1000); holdUntil = 0; });
+playBtn.addEventListener('click', () => { if (!playing && t >= END_M - 0.01) restart(); setPlaying(!playing); });
 document.querySelectorAll('input[name=scn]').forEach(r => r.addEventListener('change', () => { scenario = r.value; markEvents(); }));
 
-const $ = id => document.getElementById(id);
+function restart() {
+  t = 0; holdUntil = 0; endAt = 0; embers = [];
+  simulate(0, scenario); groups.forEach(g => g.stars.forEach(s => { s.disp = lum(s); s.wasOn = true; }));
+}
+
 function caption(t, res) {
-  const evs = EVENTS.filter(e => e.m <= t && (!e.scenario || e.scenario === scenario));
-  const ev = evs.at(-1);
+  const evs = activeEvents().filter(e => e.m <= t), ev = evs.at(-1);
   if (t < 4.5) return `<small>Sep 2024</small>Every position filled. The brightest stars hold decades of experience.`;
   if (ev && (t - ev.m < 3.5 || ev.id !== 'refill' && t < SPLIT_M + 2)) return `<small>${fmt(ev.m)} · ${ev.label}</small>${ev.text}`;
   const yrs = Math.floor((t - EVENTS[0].m) / 12);
@@ -438,14 +556,42 @@ function caption(t, res) {
   return `<small>${yrs} years after the first cuts</small>With no rehiring, the empty outlines stay empty. Experience holds at ${Math.round(res.exp * 100)}% of where it was.`;
 }
 
+// ---------- gallery mode ----------
+// Plays on a loop: slow through 2025, a pause on each event, faster through the years of regrowth,
+// a long hold at the end, then a fade to black and back to Sep 2024.
+const GALLERY = { early: 0.75, late: 6, holdEvent: 6500, holdEnd: 9000 };
+const NORMAL = { early: 1.3, late: 9, holdEvent: 2200, holdEnd: 0 };
+let wakeTimer = 0;
+function setGallery(on) {
+  document.body.classList.toggle('gallery', on);
+  if (on) {
+    restart(); setPlaying(true);
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    try { navigator.wakeLock?.request('screen').catch(() => {}); } catch (e) {}
+  } else if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+  requestAnimationFrame(layout);
+}
+$('gallery').addEventListener('click', () => setGallery(true));
+$('exitGallery').addEventListener('click', () => setGallery(false));
+addEventListener('keydown', e => {
+  if (e.target.matches?.('input, textarea')) return;
+  if (e.key === 'g' || e.key === 'G') setGallery(!document.body.classList.contains('gallery'));
+  if (e.key === 'Escape' && document.body.classList.contains('gallery')) setGallery(false);
+});
+addEventListener('pointermove', () => {
+  document.body.classList.add('awake'); clearTimeout(wakeTimer);
+  wakeTimer = setTimeout(() => document.body.classList.remove('awake'), 2500);
+});
+
 // hover
 let hover = null;
-cv.addEventListener('pointermove', e => {
-  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-  hover = groups.find(g => !g.key.includes(':') && x > g.box.cell.x && x < g.box.cell.x + g.box.cell.w && y > g.box.cell.y && y < g.box.cell.y + g.box.cell.h) || null;
+cv.parentElement.addEventListener('pointermove', e => {
+  if (document.body.classList.contains('gallery')) { hover = null; return; }
+  const b = document.body.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top;
+  hover = groups.filter(g => !g.key.includes(':')).find(g => Math.hypot(x - g.box.cx, y - g.box.cy) < g.box.size * 0.6) || null;
   if (hover) { tip.style.left = Math.min(x + 14, W - 270) + 'px'; tip.style.top = (y + 14) + 'px'; }
 });
-cv.addEventListener('pointerleave', () => { hover = null; });
+document.addEventListener('pointerleave', () => { hover = null; });
 
 function updateTip() {
   if (!hover) { tip.hidden = true; return; }
@@ -458,24 +604,39 @@ function updateTip() {
 
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  if (playing) {
-    t += dt * (t < SPLIT_M ? 1.3 : 9);
-    if (t >= END_M) { t = END_M; playing = false; playBtn.textContent = 'Replay'; }
+  const gallery = document.body.classList.contains('gallery'), pace = gallery ? GALLERY : NORMAL;
+  if (playing && now >= holdUntil) {
+    const before = t;
+    t = Math.min(END_M, t + dt * (t < SPLIT_M ? pace.early : pace.late));
+    const crossed = activeEvents().find(e => e.m > before && e.m <= t);
+    if (crossed) { t = crossed.m + 0.01; holdUntil = now + pace.holdEvent; }
+    if (t >= END_M) {
+      if (gallery) {
+        if (!endAt) endAt = now;
+        if (now - endAt > pace.holdEnd) {
+          $('fade').style.opacity = 1;
+          if (now - endAt > pace.holdEnd + 2200) { restart(); $('fade').style.opacity = 0; holdUntil = now + 2500; }
+        }
+      } else setPlaying(false);
+    }
     scrub.value = Math.round(mToU(t) * 1000);
   }
   const res = simulate(t, scenario);
-  draw(now, dt, t);
+  draw(now, dt);
   $('date').textContent = fmt(t);
   $('fillPos').style.width = (res.filled * 100) + '%'; $('pctPos').textContent = Math.round(res.filled * 100) + '%';
   $('fillExp').style.width = (res.exp * 100) + '%'; $('pctExp').textContent = Math.round(res.exp * 100) + '%';
   $('yrs').textContent = `≈ ${(Math.round((baseExp - res.years) / 1e4) / 100).toFixed(2)}M person-years of experience missing`;
-  $('caption').innerHTML = caption(t, res);
+  const html = caption(t, res);
+  if ($('caption').innerHTML !== html) $('caption').innerHTML = html;
   updateTip();
   requestAnimationFrame(frame);
 }
 
-new ResizeObserver(resize).observe(cv);
-resize();
-simulate(0, scenario); groups.forEach(g => g.stars.forEach(s => { s.disp = 0.14 + 0.86 * Math.sqrt(s.exp / MAX_EXP); }));
+let resizeT = 0;
+new ResizeObserver(() => { clearTimeout(resizeT); resizeT = setTimeout(layout, 60); }).observe(document.body);
+restart();
+layout();
+if (location.hash === '#gallery') setGallery(true);
 requestAnimationFrame(frame);
 </script>
