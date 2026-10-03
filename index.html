@@ -149,12 +149,12 @@
 <canvas id="sky" aria-label="Night sky of agency constellations"></canvas>
 <header>
   <div class="intro">
-    <p>Eight federal agencies drawn as constellations. The points of light around each one are its positions, one point per 250 jobs. The bright stars are its veterans, people with fifteen or more years of service, and a star's brightness is their experience. A position can be refilled in a month. A veteran's star relights only if that person comes back.</p>
+    <p>Eight federal agencies drawn as constellations. The points of light around each one are its positions, one point per 250 jobs. The bright stars are its long-serving staff, people with fifteen or more years of service, and a star's brightness is their experience. Together they hold the agency's institutional memory. A position can be refilled in a month. A long-serving star relights only if that person comes back.</p>
   </div>
   <div class="readout" aria-live="polite">
     <div class="date" id="date">Sep 2024</div>
     <div class="meter"><span>Positions filled</span><div class="bar"><div class="fill" id="fillPos"></div></div><output id="pctPos">100%</output></div>
-    <div class="meter"><span>Veteran expertise</span><div class="bar"><div class="fill" id="fillExp"></div></div><output id="pctExp">100%</output></div>
+    <div class="meter"><span>Institutional memory</span><div class="bar"><div class="fill" id="fillExp"></div></div><output id="pctExp">100%</output></div>
     <div class="yrs" id="yrs"></div>
   </div>
 </header>
@@ -177,24 +177,24 @@
   <details>
     <summary>Key, data and assumptions</summary>
     <div class="legend">
-      <span><i class="dot" style="background:var(--star);box-shadow:0 0 8px var(--star)"></i>Veteran, 15+ years (brightness = experience)</span>
+      <span><i class="dot" style="background:var(--star);box-shadow:0 0 8px var(--star)"></i>Long-serving staff, 15+ years (brightness = experience)</span>
       <span><i class="dot" style="background:var(--newhire);opacity:.7;width:5px;height:5px"></i>Newly filled position</span>
-      <span><i class="dot" style="border:1px dashed var(--muted)"></i>Veteran gone</span>
+      <span><i class="dot" style="border:1px dashed var(--muted)"></i>Long-serving staff gone</span>
       <span><i class="dot" style="background:var(--ember)"></i>Moment of loss</span>
       <span><i class="dot" style="background:var(--star);opacity:.6;width:4px;height:4px"></i>One point = 250 positions</span>
       <span><i class="dot" style="background:#6c7590"></i>Shut down (unfunded, unpaid; experience intact)</span>
     </div>
     <ul>
       <li><b>This is a sketch, not a dataset.</b> The figures are rough approximations from published reporting (GAO, Partnership for Public Service, Pew, agency announcements, and for ACF, tallies by former staff). Before you show it, check each one against OPM's workforce data and edit the <code>EVENTS</code> block in the source.</li>
-      <li>Two layers, two measures. The points are positions: one per 250 jobs, simply filled or empty, so a hire relights one at once. This is what headcount reporting counts. The constellation stars are veterans: each agency's staff with 15 or more years of service, 12 stars per agency, so one star is about 8% of its veterans. A star's brightness is its experience. Only reinstating the same people relights a star; new hires don't, because no one hired today is a fifteen-year veteran.</li>
-      <li>The lines between stars connect the veterans. A line is drawn while both of its stars are present.</li>
-      <li>Veteran shares are estimates for each agency (from 20% at TSA to 40% at IRS, FAA and NIOSH); check OPM length-of-service data. Veterans feel each kind of cut differently: probationary firings remove no veterans; deferred resignations and early retirements remove them at 1.6 times the agency's overall rate; RIFs remove them at the overall rate. Losses smaller than half a star don't put one out.</li>
+      <li>Two layers, two measures. The points are positions: one per 250 jobs, simply filled or empty, so a hire relights one at once. This is what headcount reporting counts. The constellation stars are long-serving staff: each agency's people with 15 or more years of service, 12 stars per agency, so one star is about 8% of its long-serving staff. A star's brightness is its experience. Together they measure institutional memory. Only reinstating the same people relights a star; new hires don't, because no one hired today has fifteen years of service.</li>
+      <li>The lines between stars connect the long-serving staff. A line is drawn while both of its stars are present.</li>
+      <li>The share of long-serving staff is an estimate for each agency (from 20% at TSA to 40% at IRS, FAA and NIOSH); check OPM length-of-service data. Long-serving staff feel each kind of cut differently: probationary firings remove none of them; deferred resignations and early retirements remove them at 1.6 times the agency's overall rate; RIFs remove them at the overall rate. Losses smaller than half a star don't put one out.</li>
       <li>Reinstated staff return at full brightness (the October 2025 RIFs, reversed in November; NIOSH reinstatements in January 2026). New hires, such as the IRS seasonal hires, return faint.</li>
       <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark.</li>
       <li>Shutdowns: while an agency is unfunded, its stars and people go dark grey and stop twinkling, because nothing is moving and no one is being paid. A day counter runs under its name. Furloughed and unpaid staff are still employees, so no experience is lost and the stars return as they were when funding comes back. The exception is people who quit, like the more than 1,100 TSA officers who left during the 76-day DHS shutdown in 2026. Two shutdowns are shown: Oct 1 – Nov 12, 2025 (government-wide, 43 days) and Feb 14 – Apr 30, 2026 (DHS only). A four-day partial lapse from Jan 31 to Feb 3, 2026 is mentioned in a caption but not drawn.</li>
       <li>The timeline ends at the present, October 2026. It shows no forecast. Funding is extended through Dec 11, 2026, so no third shutdown is drawn.</li>
       <li>How changes show: when an event happens, the caption appears first. Then the stars of each agency it affects change one at a time, and a count of the people lost or returned ticks up under its name. A star that goes out flares and leaves an amber afterglow. A returning star arrives with a closing ring. New hires shift from blue to gold as they gain experience, and send out a small ring at every new year.</li>
-      <li>The meters: "Positions filled" counts the points. "Veteran expertise" adds up the veterans' years of experience against September 2024. The percentages under each name use the same two measures.</li>
+      <li>The meters: "Positions filled" counts the points. "Institutional memory" adds up the long-serving staff's years of experience against September 2024. The percentages under each name use the same two measures.</li>
       <li>Memory: press and hold "Remember Sep 2024" to see the sky as it was before the cuts. When you let go, amber rings briefly mark the experience that has not come back. Gallery mode does this on its own at the end of every loop.</li>
       <li>Installation mode is for a room with a knob: nothing moves on its own. Turning the knob moves through time in either direction, and holding the space bar (or the knob's push button) remembers Sep 2024. The knob can send arrow keys, + and −, or scroll-wheel movement. After three minutes untouched it fades back to Sep 2024 for the next visitor. Press I to enter, or add <code>#install</code> to the address.</li>
       <li>Gallery mode plays the full timeline on a loop, pausing on each event. Add <code>#gallery</code> to the end of the address to open straight into it.</li>
@@ -236,7 +236,7 @@ const AGENCIES = [
 
 const EVENTS = [
   { id: 'prob', date: '2025-02-14', label: 'Probationary employees terminated',
-    text: 'Newly hired and recently promoted staff are let go across agencies. Points of light go out, but the constellations hold: none of these people were veterans yet.',
+    text: 'Newly hired and recently promoted staff are let go across agencies. Points of light go out, but the constellations hold: none of these people had been there long yet.',
     effects: [ ['fs','cut',.12,'newest'], ['nps','cut',.06,'newest'], ['cdc','cut',.06,'newest'],
                ['irs','cut',.07,'newest'], ['acf','cut',.12,'newest'], ['faa','cut',.01,'newest'] ] },
   { id: 'hhs', date: '2025-04-01', label: 'HHS reduction in force',
@@ -256,7 +256,7 @@ const EVENTS = [
     text: 'After 43 days, the longest shutdown in US history, funding returns. The deal also rescinds the October layoffs. The same people return, so their stars come back at full brightness.',
     effects: [ ['*','reopen'], ['acf','reinstate','oct'], ['cdc','reinstate','oct'] ] },
   { id: 'jan', date: '2026-01-15', label: 'Reinstatements and seasonal hiring',
-    text: 'NIOSH reinstates most of its staff at full experience. The IRS adds about 2,200 seasonal hires for filing season. They fill positions, but none of them are veterans.',
+    text: 'NIOSH reinstates most of its staff at full experience. The IRS adds about 2,200 seasonal hires for filing season. They fill positions, but none of them bring institutional memory.',
     effects: [ ['niosh','reinstate','hhs',.92], ['irs','hire',.03] ] },
   { id: 'dhs', date: '2026-02-14', label: 'Second shutdown: Homeland Security',
     text: 'After a four-day lapse in early February, funding runs out for the Department of Homeland Security alone. TSA officers keep screening passengers without pay.',
@@ -322,7 +322,7 @@ AGENCIES.forEach(a => {
   const mk = (gid, name, n, paths, noRefill, isCluster) => {
     const fig = buildFigure(paths, n, r, isCluster);
     fig.stars.forEach(s => {
-      const e = 15 + Math.abs(gauss(r)) * 8;        // veterans: 15 or more years of service
+      const e = 15 + Math.abs(gauss(r)) * 8;        // long-serving staff: 15 or more years of service
       Object.assign(s, { exp0: Math.min(MAX_EXP, e), disp: 0, wasOn: true, tw: r() * 6.28 });
     });
     // the anchors should be the brightest stars of the figure, like the named stars of a real constellation
@@ -355,8 +355,8 @@ const dusts = AGENCIES.map(a => {
 const byDust = Object.fromEntries(dusts.map(d => [d.agency.id, d]));
 const allGroups = groups.concat(dusts);
 
-/* Veterans (the constellation stars) feel each kind of cut differently from the workforce as a whole:
-   probationary firings take no veterans; deferred resignations and early retirements take them at VET_TILT
+/* Long-serving staff (the constellation stars) feel each kind of cut differently from the workforce as a whole:
+   probationary firings take none of them; deferred resignations and early retirements take them at VET_TILT
    times the overall rate; RIFs take them at the overall rate. */
 const VET_TILT = 1.6;
 const vetShare = (x, pick) => pick === 'newest' ? 0 : pick === 'oldest' ? Math.min(1, x * VET_TILT) : x;
@@ -375,7 +375,7 @@ function simulate(t, scenario) {
         continue;
       }
       if (kind === 'cut') applyEffect(byKey[key], kind, key.includes(':') ? x : vetShare(x, y), y, ev, r);
-      else if (kind !== 'hire') applyEffect(byKey[key], kind, x, y, ev, r);   // a new hire fills a position, not a veteran's place
+      else if (kind !== 'hire') applyEffect(byKey[key], kind, x, y, ev, r);   // a new hire fills a position, not a long-serving person's place
       if (!key.includes(':') && byDust[key]) applyEffect(byDust[key], kind, x, y, ev, r);
     }
   }
@@ -389,7 +389,7 @@ function simulate(t, scenario) {
     if (g.isDust) { filled += g.filled; total += g.stars.length; }
     else { vet += g.exp * g.people; vetBase += g.base * g.people; }
   }
-  // positions come from the points; expertise comes from the veterans
+  // positions come from the points; institutional memory comes from the long-serving staff
   return { filled: filled / total, exp: vet / vetBase, missing: vetBase - vet };
 }
 
@@ -636,7 +636,7 @@ function draw(now, dt) {
       if (!gallery) {
         const dg = byDust[g.agency.id];
         ctx.font = `10px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = 'rgba(138,147,171,0.75)';
-        ctx.fillText(`${Math.round(dg.filled / dg.stars.length * 100)}% positions · ${Math.round(g.exp / g.base * 100)}% veterans`, g.box.cx, ly);
+        ctx.fillText(`${Math.round(dg.filled / dg.stars.length * 100)}% positions · ${Math.round(g.exp / g.base * 100)}% memory`, g.box.cx, ly);
       }
       if (ex) {
         const sx = Math.max(...ex.stars.map(s => s.sx)) + 8, sy = ex.stars.reduce((t, s) => t + s.sy, 0) / 3;
@@ -705,8 +705,8 @@ function restart() {
 
 function caption(t, res) {
   const evs = activeEvents().filter(e => e.m <= t), ev = evs.at(-1);
-  if (t < 4.5) return `<small>Sep 2024</small>Every position filled. The bright stars are the veterans, each holding fifteen years of experience or more.` + (installMode ? `<span class="hint">Turn the dial to move through time · Press and hold to remember</span>` : '');
-  if (t >= END_M - 0.6) return `<small>${fmt(END_M)} · Today</small>Positions ${Math.round(res.filled * 100)}% filled. Veteran expertise ${Math.round(res.exp * 100)}% of what it was in September 2024.`;
+  if (t < 4.5) return `<small>Sep 2024</small>Every position filled. The bright stars are the long-serving staff, each holding fifteen years of experience or more.` + (installMode ? `<span class="hint">Turn the dial to move through time · Press and hold to remember</span>` : '');
+  if (t >= END_M - 0.6) return `<small>${fmt(END_M)} · Today</small>Positions ${Math.round(res.filled * 100)}% filled. Institutional memory ${Math.round(res.exp * 100)}% of what it was in September 2024.`;
   if (ev) return `<small>${fmt(ev.m)} · ${ev.label}</small>${ev.text}`;
   return '';
 }
@@ -822,7 +822,7 @@ function updateTip() {
   const g = hover, ex = byKey[g.key + ':ssbg'];
   const dg = byDust[g.agency.id], lit = dg.stars.filter(s => s.on).length, vets = g.stars.filter(s => s.on).length;
   const lostYrs = Math.round((g.base - g.exp) * g.people);
-  tip.innerHTML = `<b>${g.agency.name}</b>Positions: ≈${g.agency.staff.toLocaleString()} in Sep 2024 · ≈${(lit * PER_POINT).toLocaleString()} now<br>1 point = ${PER_POINT} positions<br>Veterans (15+ yrs): ${vets} of ${g.stars.length} stars · 1 star ≈ ${Math.round(g.people).toLocaleString()} veterans<br>≈${lostYrs.toLocaleString()} years of veteran experience gone` + (ex ? `<br>SSBG team: ${ex.stars.filter(s => s.on).length}/${ex.stars.length} remaining` : '');
+  tip.innerHTML = `<b>${g.agency.name}</b>Positions: ≈${g.agency.staff.toLocaleString()} in Sep 2024 · ≈${(lit * PER_POINT).toLocaleString()} now<br>1 point = ${PER_POINT} positions<br>Long-serving staff (15+ yrs): ${vets} of ${g.stars.length} stars · 1 star ≈ ${Math.round(g.people).toLocaleString()} people<br>≈${lostYrs.toLocaleString()} years of institutional memory gone` + (ex ? `<br>SSBG team: ${ex.stars.filter(s => s.on).length}/${ex.stars.length} remaining` : '');
   tip.hidden = false;
 }
 
@@ -929,9 +929,9 @@ function frame(now) {
   $('date').textContent = mem > 0.5 ? 'Sep 2024' : fmt(t);
   $('fillPos').style.width = (res.filled * 100) + '%'; $('pctPos').textContent = Math.round(res.filled * 100) + '%';
   $('fillExp').style.width = (res.exp * 100) + '%'; $('pctExp').textContent = Math.round(res.exp * 100) + '%';
-  $('yrs').textContent = `≈ ${(Math.round(res.missing / 1e4) / 100).toFixed(2)}M years of veteran experience gone`;
-  const html = mem > 0.5 ? `<small>Remember · Sep 2024</small>This was the sky before the cuts. Every position filled, every veteran in place.`
-    : echo > 0.05 ? `<small>Back to ${fmt(t)}</small>The amber rings mark veterans who are gone. Today the sky holds ${Math.round(res.exp * 100)}% of the veteran expertise it had.`
+  $('yrs').textContent = `≈ ${(Math.round(res.missing / 1e4) / 100).toFixed(2)}M years of institutional memory gone`;
+  const html = mem > 0.5 ? `<small>Remember · Sep 2024</small>This was the sky before the cuts. Every position filled, every long-serving person in place.`
+    : echo > 0.05 ? `<small>Back to ${fmt(t)}</small>The amber rings mark long-serving staff who are gone. Today the sky holds ${Math.round(res.exp * 100)}% of the institutional memory it had.`
     : caption(t, res);
   if ($('caption').innerHTML !== html) $('caption').innerHTML = html;
   updateTip();
