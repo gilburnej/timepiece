@@ -526,14 +526,14 @@ function drawStar(x, y, b, col, scale, now, tw) {
    - a returning star arrives with a ring that closes in on it: amber-white if reinstated, blue if a new hire
    - new hires shift from blue to gold as they gain experience, and pulse once at every new year */
 const OUT_MS = 7000, IN_MS = 1400, PULSE_MS = 1100;
-let spotIds = null, spotAt = 0, evRead = 0, evSpan = 1, evPeople = {}, bgDim = 1, pulseAt = -1e9;
+let spotIds = null, spotUntil = 0, spotAt = 0, evRead = 0, evSpan = 1, evPeople = {}, bgDim = 1, pulseAt = -1e9;
 /* The memory flash: mem (0–1) blends every star back to its Sep 2024 brightness. When it fades away,
    echo leaves a faint amber ring wherever experience has not come back, like the outlines on a shadow board. */
 let mem = 0, echo = 0;
 
 function draw(now, dt) {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  const spotOn = spotIds && now < holdUntil;
+  const spotOn = spotIds && now < spotUntil;
   bgDim += ((spotOn ? 0.72 : 1) - bgDim) * Math.min(1, dt * 2.5);
   ctx.fillStyle = C.sky; ctx.fillRect(0, 0, W, H);
   ctx.globalAlpha = bgDim;
@@ -703,13 +703,13 @@ markEvents();
 
 function setPlaying(p) { playing = p; playBtn.textContent = p ? 'Pause' : (t >= END_M ? 'Replay' : 'Play'); }
 scrub.addEventListener('input', () => {
-  t = uToM(scrub.value / 1000); holdUntil = 0; spotIds = null;
+  t = uToM(scrub.value / 1000); holdUntil = 0; spotUntil = 0; spotIds = null;
   allGroups.forEach(g => { g.veilAt = 0; g.stars.forEach(s => { s.changeAt = 0; }); });
 });
 playBtn.addEventListener('click', () => { if (!playing && t >= END_M - 0.01) restart(); setPlaying(!playing); });
 
 function restart() {
-  t = 0; tTarget = 0; holdUntil = 0; endAt = 0; embers = []; pointEmbers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9;
+  t = 0; tTarget = 0; holdUntil = 0; spotUntil = 0; endAt = 0; embers = []; pointEmbers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9;
   simulate(0, scenario);
   allGroups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; g.lastVeiled = g.veilShown = false; g.veilAmt = 0; g.veilAt = 0; g.stars.forEach(s => { s.disp = g.isDust ? POINT_B : lum(s); s.wasOn = s.lastOn = true; s.changeAt = 0; }); });
 }
@@ -727,10 +727,11 @@ function caption(t, res) {
 // a long hold at the end, then a fade to black and back to Sep 2024.
 // read: how long the caption shows before the stars change; span: how long the star-by-star cascade takes
 /* Pacing. Time runs at 'quiet' months per second through stretches where nothing happens, eases down to 'near'
-   as an event approaches, and slows to 'shutdown' while an agency is shut down so the day counter can be read.
+   as an event approaches. While an agency is shut down, time runs at a steady 'shutdownDays' days per second,
+   with no easing and no pauses for events inside the shutdown, so the day counter climbs evenly.
    At an event: 'read' ms for the caption, then each change gets 'per' ms (the whole cascade kept between
    minSpan and maxSpan), then 'after' ms to look at the result. */
-const GALLERY = { quiet: 3, near: 0.45, shutdown: 0.8, read: 3000, per: 55, minSpan: 5000, maxSpan: 15000, after: 4500, holdEnd: 16000 };
+const GALLERY = { quiet: 3, near: 0.45, shutdownDays: 3.5, read: 3000, per: 55, minSpan: 5000, maxSpan: 15000, after: 4500, holdEnd: 16000 };
 // The end of each gallery loop (ms after reaching the present): hold, the memory rises, holds, fades, then the echo lingers.
 const MEMORY = { start: 2500, rise: 1500, hold: 4500, fall: 2200, echo: 5500 };
 const smooth = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
@@ -742,11 +743,11 @@ function galleryMemory(e) {
   if (e < down) return 1;
   return 1 - smooth((e - down) / M.fall);
 }
-const NORMAL = { quiet: 4, near: 0.7, shutdown: 1.2, read: 900, per: 30, minSpan: 2500, maxSpan: 8000, after: 2500, holdEnd: 0 };
+const NORMAL = { quiet: 4, near: 0.7, shutdownDays: 6, read: 900, per: 30, minSpan: 2500, maxSpan: 8000, after: 2500, holdEnd: 0 };
 function speedAt(t, pace) {
   const next = activeEvents().find(e => e.m > t + 1e-6), dm = next ? next.m - t : 99;
   let v = Math.min(pace.quiet, Math.max(pace.near, dm * 1.5));
-  if (groups.some(g => g.veiled)) v = Math.min(v, pace.shutdown);
+  if (groups.some(g => g.veiled)) return pace.shutdownDays / 30.44;
   return v;
 }
 let wakeTimer = 0;
@@ -871,7 +872,7 @@ function scheduleChanges(now) {
     const span = Math.max(cascade.minSpan, Math.min(cascade.maxSpan, changed.length * cascade.per)), step = span / changed.length;
     changed.forEach(([, s], i) => { s.changeAt = now + cascade.read + i * step; });
     evSpan = span;
-    if (cascade.after) holdUntil = now + cascade.read + span + cascade.after;
+    if (cascade.after) { spotUntil = now + cascade.read + span + cascade.after; if (cascade.hold) holdUntil = spotUntil; }
   } else changed.forEach(([, s]) => { s.changeAt = 0; });
   cascade = null;
 }
@@ -884,10 +885,10 @@ function frame(now) {
     t += (tTarget - t) * Math.min(1, dt * 5); if (Math.abs(tTarget - t) < 0.01) t = tTarget;
     const crossed = activeEvents().filter(e => e.m > before && e.m <= t).at(-1);
     if (crossed) {
-      cascade = { at: now, read: 250, per: 12, minSpan: 1200, maxSpan: 2400 }; holdUntil = now + KNOB.spot;
+      cascade = { at: now, read: 250, per: 12, minSpan: 1200, maxSpan: 2400 }; holdUntil = spotUntil = now + KNOB.spot;
       startEvent(crossed, now, 250, 1200); spotIds = new Set(crossed.effects.map(([k]) => k === '*' ? AGENCIES.map(a => a.id) : [k.split(':')[0]]).flat());
       groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; });
-    } else if (t < before - 0.001) { spotIds = null; holdUntil = 0; }
+    } else if (t < before - 0.001) { spotIds = null; holdUntil = spotUntil = 0; }
     const yr = Math.floor(t / 12);
     if (yr !== lastYear && t > SPLIT_M) pulseAt = now;
     lastYear = yr;
@@ -901,8 +902,13 @@ function frame(now) {
     t = Math.min(END_M, t + dt * speedAt(t, pace));
     const crossed = activeEvents().find(e => e.m > before && e.m <= t);
     if (crossed) {
-      t = crossed.m + 0.01; holdUntil = now + pace.read + pace.minSpan + pace.after;   // extended once the changes are counted
-      cascade = { at: now, read: pace.read, per: pace.per, minSpan: pace.minSpan, maxSpan: pace.maxSpan, after: pace.after };
+      // events inside a shutdown play without stopping the clock; a shutdown's start and end still pause it
+      const midShutdown = groups.some(g => g.veiled) && !crossed.effects.some(f => f[1] === 'reopen');
+      // an event that only starts or ends a shutdown has no stars to change, so it pauses just long enough to read and see the sky go dark
+      const veilOnly = crossed.effects.every(f => f[1] === 'shutdown' || f[1] === 'reopen');
+      t = crossed.m + 0.01; spotUntil = now + pace.read + (veilOnly ? 2500 : pace.minSpan + pace.after);   // extended once the changes are counted
+      holdUntil = midShutdown ? 0 : spotUntil;
+      cascade = { at: now, read: pace.read, per: pace.per, minSpan: pace.minSpan, maxSpan: pace.maxSpan, after: pace.after, hold: !midShutdown };
       startEvent(crossed, now, pace.read, pace.minSpan); spotIds = new Set(crossed.effects.map(([k]) => k === '*' ? AGENCIES.map(a => a.id) : [k.split(':')[0]]).flat());
       groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; });
     }
