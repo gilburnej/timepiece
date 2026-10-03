@@ -197,6 +197,7 @@
       <span><i class="dot" style="background:var(--newhire);opacity:.6"></i>New hire (starts at zero, gains 1 yr/yr)</span>
       <span><i class="dot" style="border:1px dashed var(--muted)"></i>Empty position</span>
       <span><i class="dot" style="background:var(--ember)"></i>Moment of loss</span>
+      <span><i class="dot" style="background:#9fb0d6;opacity:.5"></i>Shut down (unfunded; experience intact)</span>
     </div>
     <ul>
       <li><b>This is a sketch, not a dataset.</b> The figures are rough approximations from published reporting (GAO, Partnership for Public Service, Pew, agency announcements, and for ACF, tallies by former staff). Before you show it, check each one against OPM's workforce data and edit the <code>EVENTS</code> block in the source.</li>
@@ -205,7 +206,8 @@
       <li>Experience per star is estimated from an assumed average tenure for each agency. Probationary firings remove the newest stars. Deferred resignations and early retirements remove the most experienced. RIFs pick stars at random.</li>
       <li>Reinstated staff return at full brightness (the October 2025 RIFs, reversed in November; NIOSH reinstatements in January 2026). New hires, such as the IRS seasonal hires, return faint.</li>
       <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark even when every other vacancy is refilled.</li>
-      <li>"Refill every vacancy" is hypothetical. It shows how long full recovery would take in the best case: every empty position filled by July 2026, with no further cuts.</li>
+      <li>Shutdowns: while an agency is unfunded, its stars dim and turn cool, and a day counter runs under its name. Furloughed and unpaid staff are still employees, so no experience is lost and the stars return as they were when funding comes back. The exception is people who quit, like the more than 1,100 TSA officers who left during the 76-day DHS shutdown in 2026. Two shutdowns are shown: Oct 1 – Nov 12, 2025 (government-wide, 43 days) and Feb 14 – Apr 30, 2026 (DHS only). A four-day partial lapse from Jan 31 to Feb 3, 2026 is mentioned in a caption but not drawn.</li>
+      <li>The timeline ends in January 2030. "Refill every vacancy" is hypothetical. It shows how long full recovery would take in the best case: every empty position filled by July 2026, with no further cuts.</li>
       <li>How changes show: when an event happens, the caption appears first. Then an orange ring circles each agency it affects, and their stars change one at a time. A star that goes out flares and leaves an amber afterglow. A returning star arrives with a closing ring. New hires shift from blue to gold as they gain experience, and send out a small ring at every new year.</li>
       <li>Memory: press and hold "Remember Sep 2024" to see the sky as it was before the cuts. When you let go, amber rings briefly mark the experience that has not come back. Gallery mode does this on its own at the end of every loop.</li>
       <li>Installation mode is for a room with a knob: nothing moves on its own. Turning the knob moves through time in either direction, and holding the space bar (or the knob's push button) remembers Sep 2024. The knob can send arrow keys, + and −, or scroll-wheel movement. After three minutes untouched it fades back to Sep 2024 for the next visitor. Press I to enter, or add <code>#install</code> to the address.</li>
@@ -223,6 +225,7 @@
    Approximate figures for a demo. Verify against OPM workforce data.
    frac = share of the agency's Sep 2024 workforce (36 stars each).
    pick: 'newest' (probationary), 'oldest' (retirement/DRP), 'random' (RIF)
+   'shutdown' / 'reopen' mark an agency unfunded: its stars dim and cool, but nobody's experience changes
    =================================================================== */
 const AGENCIES = [
   { id: 'fs',    name: 'Forest Service',              staff: 35000, tenure: 13,
@@ -256,15 +259,24 @@ const EVENTS = [
     text: 'Staff who took deferred resignation or early retirement leave the rolls. These are often the most experienced people in the building.',
     effects: [ ['fs','cut',.15,'oldest'], ['nps','cut',.20,'oldest'], ['cdc','cut',.08,'oldest'],
                ['irs','cut',.20,'oldest'], ['tsa','cut',.028,'oldest'], ['faa','cut',.03,'oldest'] ] },
+  { id: 'shut25', date: '2025-10-01', label: 'Government shutdown begins',
+    text: 'Funding lapses for most of the government. About 670,000 federal employees are furloughed. About 730,000 more, including air traffic controllers and TSA officers, keep working without pay.',
+    effects: [ ['*','shutdown'] ] },
   { id: 'oct', date: '2025-10-10', label: 'Shutdown RIF notices',
     text: 'Another round of layoffs during the shutdown, including about 50 more at ACF.',
     effects: [ ['acf','cut',.03,'random'], ['cdc','cut',.04,'random'] ] },
-  { id: 'nov', date: '2025-11-12', label: 'October RIFs reversed',
-    text: 'The funding deal rescinds the October layoffs. The same people return, so their stars come back at full brightness.',
-    effects: [ ['acf','reinstate','oct'], ['cdc','reinstate','oct'] ] },
+  { id: 'nov', date: '2025-11-12', label: 'Shutdown ends · October RIFs reversed',
+    text: 'After 43 days, the longest shutdown in US history, funding returns. The deal also rescinds the October layoffs. The same people return, so their stars come back at full brightness.',
+    effects: [ ['*','reopen'], ['acf','reinstate','oct'], ['cdc','reinstate','oct'] ] },
   { id: 'jan', date: '2026-01-15', label: 'Reinstatements and seasonal hiring',
     text: 'NIOSH reinstates most of its staff at full experience. The IRS adds about 2,200 seasonal hires for filing season, who start with none.',
     effects: [ ['niosh','reinstate','hhs',.92], ['irs','hire',.03] ] },
+  { id: 'dhs', date: '2026-02-14', label: 'Second shutdown: Homeland Security',
+    text: 'After a four-day lapse in early February, funding runs out for the Department of Homeland Security alone. TSA officers keep screening passengers without pay.',
+    effects: [ ['tsa','shutdown'] ] },
+  { id: 'dhsend', date: '2026-04-30', label: 'DHS shutdown ends',
+    text: 'After 76 days, a new record, DHS is funded again. More than 1,100 TSA officers quit while working without pay, and their experience left with them.',
+    effects: [ ['tsa','reopen'], ['tsa','cut',.018,'random'] ] },
   { id: 'refill', date: '2026-07-01', label: 'Hypothetical: every vacancy refilled', scenario: 'refill',
     text: 'Suppose every empty position were filled tomorrow. The shapes return at once. The light does not.',
     effects: [ ['*','refill'] ] },
@@ -281,8 +293,8 @@ const PLACES = {
 };
 
 const START = new Date(2024, 8, 1);           // Sep 2024
-const END_M = 256;                            // months -> Jan 2046
-const SPLIT_M = 22, SPLIT_U = 0.45;           // first 45% of the slider covers Sep 2024–Jul 2026
+const END_M = 64;                             // months -> Jan 2030
+const SPLIT_M = 22, SPLIT_U = 0.62;           // first 62% of the slider covers Sep 2024–Jul 2026
 const STARS = 12, MAX_EXP = 30;
 const STAR_SIZE = 2.1;                        // how much larger than a realistic star each star is drawn
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -345,13 +357,17 @@ const baseExp = groups.reduce((s, g) => s + g.stars.reduce((t, st) => t + st.exp
 
 // Replay events up to month t. Each star: on, hireM (null = incumbent), cutBy.
 function simulate(t, scenario) {
-  for (const g of groups) { g.carry = 0; for (const s of g.stars) { s.on = true; s.hireM = null; s.cutBy = null; } }
+  for (const g of groups) { g.carry = 0; g.veiled = false; for (const s of g.stars) { s.on = true; s.hireM = null; s.cutBy = null; } }
   for (const ev of EVENTS) {
     if (ev.m > t) break;
     if (ev.scenario && ev.scenario !== scenario) continue;
     const r = rng(ev.id);
     for (const [key, kind, x, y] of ev.effects) {
       if (kind === 'refill') { for (const g of groups) if (!g.noRefill) for (const s of g.stars) if (!s.on) { s.on = true; s.hireM = ev.m; s.cutBy = null; } continue; }
+      if (kind === 'shutdown' || kind === 'reopen') {
+        for (const g of groups) if (key === '*' || g.agency.id === key) { g.veiled = kind === 'shutdown'; if (g.veiled) g.veilStart = ev.m; }
+        continue;
+      }
       const g = byKey[key];
       if (kind === 'cut') {
         let lit = g.stars.filter(s => s.on);
@@ -389,7 +405,7 @@ const cv = document.getElementById('sky'), ctx = cv.getContext('2d');
 const tip = document.getElementById('tip'), fieldEl = document.getElementById('field');
 let W = 0, H = 0, DPR = 1, bg = null, twinklers = [], embers = [];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const C = { star: css('--star'), nh: css('--newhire'), ember: css('--ember'), ink: css('--ink'), muted: css('--muted'), sky: css('--sky'), sky2: css('--sky-2') };
+const C = { shut: '#9fb0d6', star: css('--star'), nh: css('--newhire'), ember: css('--ember'), ink: css('--ink'), muted: css('--muted'), sky: css('--sky'), sky2: css('--sky-2') };
 const TINTS = ['#c9d8ff', '#e4ebff', '#ffffff', '#fff4e2', '#ffe2bd', '#ffc99a'];
 
 // Paint the still part of the sky once per resize: gradient, Milky Way haze, dust lanes and thousands of faint stars.
@@ -505,7 +521,11 @@ function draw(now, dt) {
   const pulse = Math.max(0, 1 - (now - pulseAt) / PULSE_MS);
   for (const g of groups) {
     const inSpot = !spotOn || spotIds.has(g.agency.id);
-    g.focus = 1;   // constellations are never dimmed: only lost stars go dark
+    g.focus = 1;   // constellations are never dimmed for focus: only lost stars go dark
+    // shutdown: the agency's stars dim and cool while it is unfunded, then return as they were
+    if (!g.veilAt || now >= g.veilAt) g.veilShown = g.veiled;
+    g.veilAmt = (g.veilAmt || 0) + ((g.veilShown ? 1 : 0) - (g.veilAmt || 0)) * Math.min(1, dt * 1.8);
+    const vf = g.veilAmt * (1 - mem), cool = c => vf > 0.01 ? mixHex(c, C.shut, vf * 0.85) : c;
     ctx.globalAlpha = 1;
     // agencies in focus get an orange ring that traces itself around the constellation, holds, then fades
     if (spotOn && inSpot && g.ringR && spotIds.size < AGENCIES.length) {
@@ -530,14 +550,14 @@ function draw(now, dt) {
     // figure lines mean filled positions: drawn when both ends are staffed, regardless of experience
     for (const [i, j] of g.links) {
       const a = g.stars[i], b = g.stars[j], both = a.wasOn && b.wasOn, f = both ? 1 : mem;
-      ctx.strokeStyle = `rgba(170,188,230,${(0.06 + 0.2 * f).toFixed(3)})`;
+      ctx.strokeStyle = `rgba(170,188,230,${((0.06 + 0.2 * f) * (1 - 0.25 * vf)).toFixed(3)})`;
       ctx.lineWidth = 0.8; ctx.setLineDash(f > 0.5 ? [] : [2, 4]);
       const dx = b.sx - a.sx, dy = b.sy - a.sy, L = Math.hypot(dx, dy) || 1, gap = 5 * g.scale * STAR_SIZE * 0.8;
       ctx.beginPath(); ctx.moveTo(a.sx + dx / L * gap, a.sy + dy / L * gap); ctx.lineTo(b.sx - dx / L * gap, b.sy - dy / L * gap); ctx.stroke();
     }
     ctx.setLineDash([]);
     for (const s of g.stars) {
-      const bb = s.disp + (s.b0 - s.disp) * mem;
+      const bb = (s.disp + (s.b0 - s.disp) * mem) * (1 - 0.3 * vf);
       if (echo > 0) {
         const d = s.b0 - s.disp;
         if (d > 0.06) { ctx.strokeStyle = hexA(C.ember, echo * Math.min(1, d * 1.8) * 0.75); ctx.lineWidth = 0.9; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.arc(s.sx, s.sy, (1.5 + s.b0 * 4.5) * g.scale * STAR_SIZE, 0, 6.283); ctx.stroke(); ctx.setLineDash([]); }
@@ -549,9 +569,9 @@ function draw(now, dt) {
       const isNew = s.wasOn && s.hireM !== null && s.exp < s.exp0 - 0.01;
       if (isNew) {
         const f = Math.min(1, s.exp / s.exp0), col = mixHex(C.nh, C.star, f);
-        drawStar(s.sx, s.sy, Math.min(1, bb + pulse * 0.35 * (1 - mem)), mixHex(col, C.star, mem), g.scale, now, s.tw);
+        drawStar(s.sx, s.sy, Math.min(1, bb + pulse * 0.35 * (1 - mem)), cool(mixHex(col, C.star, mem)), g.scale, now, s.tw);
         if (pulse > 0) { ctx.strokeStyle = hexA(col, pulse * 0.45); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(s.sx, s.sy, (3 + (1 - pulse) * 9) * g.scale * STAR_SIZE, 0, 6.283); ctx.stroke(); }
-      } else drawStar(s.sx, s.sy, bb, C.star, g.scale, now, s.tw);
+      } else drawStar(s.sx, s.sy, bb, cool(C.star), g.scale, now, s.tw);
     }
     if (!g.key.includes(':')) {
       // labels set like a star atlas: small italic, letterspaced, quiet. Brighter while in the spotlight.
@@ -562,6 +582,12 @@ function draw(now, dt) {
       ctx.fillText(g.name, g.box.cx, g.labelY);
       if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
       let ly = g.labelY + 15;
+      if (g.veiled && g.veilShown && mem < 0.5) {
+        // a day counter while the agency is shut down
+        const day = Math.max(1, Math.floor((t - g.veilStart) * 30.44) + 1);
+        ctx.font = `500 11px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = hexA(C.shut, 0.9 * Math.min(1, vf * 1.5));
+        ctx.fillText(`Shut down · day ${day}`, g.box.cx, ly); ly += 14;
+      }
       const ex = byKey[g.key + ':ssbg'], out = (g.liveOut || 0) + (ex?.liveOut || 0), back = (g.liveIn || 0) - (g.liveNew || 0), nw = g.liveNew || 0;
       if (spotOn && inSpot && (out || back || nw)) {
         // a running count of what this event did to the agency, ticking up as the cascade plays
@@ -616,11 +642,11 @@ const mToU = m => m < SPLIT_M ? m / SPLIT_M * SPLIT_U : SPLIT_U + (m - SPLIT_M) 
 let t = 0, playing = false, scenario = 'refill', last = performance.now(), holdUntil = 0, endAt = 0, cascade = null, lastYear = 0;
 
 const ticks = $('ticks');
-[['Sep 2024', 0], ['Jan 2025', 4], ['Jan 2026', 16], ['2030', 64], ['2035', 124], ['2040', 184], ['2045', 244]].forEach(([l, m]) => {
+[['Sep 2024', 0], ['Jan 2025', 4], ['Jan 2026', 16], ['2027', 28], ['2028', 40], ['2029', 52], ['2030', 64]].forEach(([l, m]) => {
   const s = document.createElement('span'); s.textContent = l; s.style.left = (mToU(m) * 100) + '%';
   if (l === 'Jan 2025') return;
-  if (l === '2030' || l === '2040') s.className = 'minor';
-  if (l === '2045') s.className = 'end';
+  if (l === '2027' || l === '2029') s.className = 'minor';
+  if (l === '2030') s.className = 'end';
   ticks.appendChild(s);
 });
 function activeEvents() { return EVENTS.filter(e => !e.scenario || e.scenario === scenario); }
@@ -633,7 +659,7 @@ markEvents();
 function setPlaying(p) { playing = p; playBtn.textContent = p ? 'Pause' : (t >= END_M ? 'Replay' : 'Play'); }
 scrub.addEventListener('input', () => {
   t = uToM(scrub.value / 1000); holdUntil = 0; spotIds = null;
-  groups.forEach(g => g.stars.forEach(s => { s.changeAt = 0; }));
+  groups.forEach(g => { g.veilAt = 0; g.stars.forEach(s => { s.changeAt = 0; }); });
 });
 playBtn.addEventListener('click', () => { if (!playing && t >= END_M - 0.01) restart(); setPlaying(!playing); });
 document.querySelectorAll('input[name=scn]').forEach(r => r.addEventListener('change', () => { scenario = r.value; markEvents(); }));
@@ -641,7 +667,7 @@ document.querySelectorAll('input[name=scn]').forEach(r => r.addEventListener('ch
 function restart() {
   t = 0; tTarget = 0; holdUntil = 0; endAt = 0; embers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9;
   simulate(0, scenario);
-  groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; g.stars.forEach(s => { s.disp = lum(s); s.wasOn = s.lastOn = true; s.changeAt = 0; }); });
+  groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; g.lastVeiled = g.veilShown = false; g.veilAmt = 0; g.veilAt = 0; g.stars.forEach(s => { s.disp = lum(s); s.wasOn = s.lastOn = true; s.changeAt = 0; }); });
 }
 
 function caption(t, res) {
@@ -649,7 +675,7 @@ function caption(t, res) {
   if (t < 4.5) return `<small>Sep 2024</small>Every position filled. The brightest stars hold decades of experience.` + (installMode ? `<span class="hint">Turn the dial to move through time · Press and hold to remember</span>` : '');
   if (ev && (t - ev.m < 3.5 || ev.id !== 'refill' && t < SPLIT_M + 2)) return `<small>${fmt(ev.m)} · ${ev.label}</small>${ev.text}`;
   const yrs = Math.floor((t - EVENTS[0].m) / 12);
-  if (scenario === 'refill' && t > 30) return `<small>${yrs} years after the first cuts</small>Positions ${Math.round(res.filled * 100)}% filled. Experience back to ${Math.round(res.exp * 100)}%. New hires gain one year of experience per year, and no faster.`;
+  if (scenario === 'refill' && t > SPLIT_M + 2) return `<small>${yrs} years after the first cuts</small>Positions ${Math.round(res.filled * 100)}% filled. Experience back to ${Math.round(res.exp * 100)}%. New hires gain one year of experience per year, and no faster.`;
   return `<small>${yrs} years after the first cuts</small>With no rehiring, the empty outlines stay empty. Experience holds at ${Math.round(res.exp * 100)}% of where it was.`;
 }
 
@@ -657,8 +683,8 @@ function caption(t, res) {
 // Plays on a loop: slow through 2025, a pause on each event, faster through the years of regrowth,
 // a long hold at the end, then a fade to black and back to Sep 2024.
 // read: how long the caption shows before the stars change; span: how long the star-by-star cascade takes
-const GALLERY = { early: 0.75, late: 6, read: 2800, span: 4500, after: 4000, holdEnd: 16000 };
-// The end of each gallery loop (ms after reaching 2045): hold, the memory rises, holds, fades, then the echo lingers.
+const GALLERY = { early: 0.75, late: 2.5, read: 2800, span: 4500, after: 4000, holdEnd: 16000 };
+// The end of each gallery loop (ms after reaching 2030): hold, the memory rises, holds, fades, then the echo lingers.
 const MEMORY = { start: 2500, rise: 1500, hold: 4500, fall: 2200, echo: 5500 };
 const smooth = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
 let memHeld = false, echoAt = -1e9;
@@ -669,7 +695,7 @@ function galleryMemory(e) {
   if (e < down) return 1;
   return 1 - smooth((e - down) / M.fall);
 }
-const NORMAL = { early: 1.3, late: 9, read: 500, span: 1800, after: 2000, holdEnd: 0 };
+const NORMAL = { early: 1.3, late: 4, read: 500, span: 1800, after: 2000, holdEnd: 0 };
 let wakeTimer = 0;
 function setGallery(on) {
   document.body.classList.toggle('gallery', on);
@@ -759,10 +785,13 @@ function updateTip() {
 
 // When the sim changes a star's state, decide when the viewer sees it: in sequence during an event, at once when scrubbing.
 function scheduleChanges(now) {
+  const live = cascade && now - cascade.at < 200;
+  // a shutdown starting or ending shows once the caption has had time to be read, like star changes
+  for (const g of groups) if (g.veiled !== g.lastVeiled) { g.lastVeiled = g.veiled; g.veilAt = live ? now + cascade.read : 0; }
   const changed = [];
   for (const g of groups) for (const s of g.stars) if (s.on !== s.lastOn) { changed.push([g, s]); s.lastOn = s.on; }
-  if (!changed.length) return;
-  if (cascade && now - cascade.at < 200) {
+  if (!changed.length) { if (cascade && !live) cascade = null; return; }
+  if (live) {
     changed.sort((p, q) => p[0].box.cx - q[0].box.cx || p[1].tw - q[1].tw);
     const step = Math.min(220, cascade.span / changed.length);
     changed.forEach(([, s], i) => { s.changeAt = now + cascade.read + i * step; });
