@@ -48,15 +48,6 @@
   }
   header > * { pointer-events: auto; }
   .intro { max-width: 44ch; min-width: 0; }
-  h1 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(34px, 5vw, 52px);
-    line-height: 1;
-    margin: 0 0 8px;
-    letter-spacing: 0.01em;
-  }
   .intro p { margin: 0; color: var(--muted); text-wrap: pretty; text-shadow: 0 0 12px var(--sky); }
   .readout { display: grid; gap: 10px; min-width: min(320px, 100%); }
   .date {
@@ -134,7 +125,6 @@
   body.gallery.awake { cursor: auto; }
   body.gallery .intro p, body.gallery .readout .meter, body.gallery .yrs,
   body.gallery .controls, body.gallery details { display: none; }
-  body.gallery h1 { font-size: 28px; opacity: 0.55; }
   body.gallery header { align-items: baseline; }
   body.gallery .date { font-size: 18px; opacity: 0.7; }
   body.gallery footer { padding-block: 0 48px; justify-items: center; text-align: center; }
@@ -159,7 +149,6 @@
 <canvas id="sky" aria-label="Night sky of agency constellations"></canvas>
 <header>
   <div class="intro">
-    <h1>Slow Light</h1>
     <p>Eight federal agencies drawn as constellations. The points of light around each one are its positions, one point per 250 jobs. The bright stars are its veterans, people with fifteen or more years of service, and a star's brightness is their experience. A position can be refilled in a month. A veteran's star relights only if that person comes back.</p>
   </div>
   <div class="readout" aria-live="polite">
