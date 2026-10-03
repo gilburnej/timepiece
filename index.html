@@ -552,7 +552,7 @@ function draw(now, dt) {
     for (const s of d.stars) {
       if (!(s.changeAt && now < s.changeAt)) {
         const target = s.on ? POINT_B : 0;
-        s.disp += (target - s.disp) * Math.min(1, dt * (target < s.disp ? 14 : 4));
+        s.disp += (target - s.disp) * Math.min(1, dt * (target < s.disp ? 5 : 4));      // fade out over about half a second
         if (s.wasOn && !s.on) pointEmbers.push({ x: s.sx, y: s.sy, t0: now });
         s.wasOn = s.on;
       }
@@ -585,7 +585,7 @@ function draw(now, dt) {
     ctx.globalAlpha = live;
     for (const s of g.stars) {
       if (s.changeAt && now < s.changeAt) continue;      // still waiting its turn in the cascade
-      const target = lum(s), k = target < s.disp ? 14 : 4;
+      const target = lum(s), k = target < s.disp ? 5 : 4;
       s.disp += (target - s.disp) * Math.min(1, dt * k);
       if (s.wasOn && !s.on) { embers.push({ kind: 'out', x: s.sx, y: s.sy, t0: now, g, scale: g.scale, b: s.disp0 ?? 1 }); g.liveOut = (g.liveOut || 0) + 1; }
       if (!s.wasOn && s.on) { const nw = s.hireM !== null; embers.push({ kind: nw ? 'new' : 'back', x: s.sx, y: s.sy, t0: now, g, scale: g.scale }); g.liveIn = (g.liveIn || 0) + 1; if (nw) g.liveNew = (g.liveNew || 0) + 1; }
@@ -726,7 +726,11 @@ function caption(t, res) {
 // Plays on a loop: slow through 2025, a pause on each event, faster through the years of regrowth,
 // a long hold at the end, then a fade to black and back to Sep 2024.
 // read: how long the caption shows before the stars change; span: how long the star-by-star cascade takes
-const GALLERY = { early: 0.75, late: 2.5, read: 2800, span: 4500, after: 4000, holdEnd: 16000 };
+/* Pacing. Time runs at 'quiet' months per second through stretches where nothing happens, eases down to 'near'
+   as an event approaches, and slows to 'shutdown' while an agency is shut down so the day counter can be read.
+   At an event: 'read' ms for the caption, then each change gets 'per' ms (the whole cascade kept between
+   minSpan and maxSpan), then 'after' ms to look at the result. */
+const GALLERY = { quiet: 3, near: 0.45, shutdown: 0.8, read: 3000, per: 55, minSpan: 5000, maxSpan: 15000, after: 4500, holdEnd: 16000 };
 // The end of each gallery loop (ms after reaching the present): hold, the memory rises, holds, fades, then the echo lingers.
 const MEMORY = { start: 2500, rise: 1500, hold: 4500, fall: 2200, echo: 5500 };
 const smooth = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
@@ -738,7 +742,13 @@ function galleryMemory(e) {
   if (e < down) return 1;
   return 1 - smooth((e - down) / M.fall);
 }
-const NORMAL = { early: 1.3, late: 4, read: 500, span: 1800, after: 2000, holdEnd: 0 };
+const NORMAL = { quiet: 4, near: 0.7, shutdown: 1.2, read: 900, per: 30, minSpan: 2500, maxSpan: 8000, after: 2500, holdEnd: 0 };
+function speedAt(t, pace) {
+  const next = activeEvents().find(e => e.m > t + 1e-6), dm = next ? next.m - t : 99;
+  let v = Math.min(pace.quiet, Math.max(pace.near, dm * 1.5));
+  if (groups.some(g => g.veiled)) v = Math.min(v, pace.shutdown);
+  return v;
+}
 let wakeTimer = 0;
 function setGallery(on) {
   document.body.classList.toggle('gallery', on);
@@ -857,8 +867,11 @@ function scheduleChanges(now) {
   if (!changed.length) { if (cascade && !live) cascade = null; return; }
   if (live) {
     changed.sort((p, q) => p[0].box.cx - q[0].box.cx || p[1].tw - q[1].tw);
-    const step = Math.min(220, cascade.span / changed.length);   // hundreds of points at once still finish within the span
+    // the bigger the event, the longer it plays: each change gets its own moment
+    const span = Math.max(cascade.minSpan, Math.min(cascade.maxSpan, changed.length * cascade.per)), step = span / changed.length;
     changed.forEach(([, s], i) => { s.changeAt = now + cascade.read + i * step; });
+    evSpan = span;
+    if (cascade.after) holdUntil = now + cascade.read + span + cascade.after;
   } else changed.forEach(([, s]) => { s.changeAt = 0; });
   cascade = null;
 }
@@ -871,7 +884,7 @@ function frame(now) {
     t += (tTarget - t) * Math.min(1, dt * 5); if (Math.abs(tTarget - t) < 0.01) t = tTarget;
     const crossed = activeEvents().filter(e => e.m > before && e.m <= t).at(-1);
     if (crossed) {
-      cascade = { at: now, read: 250, span: 1200 }; holdUntil = now + KNOB.spot;
+      cascade = { at: now, read: 250, per: 12, minSpan: 1200, maxSpan: 2400 }; holdUntil = now + KNOB.spot;
       startEvent(crossed, now, 250, 1200); spotIds = new Set(crossed.effects.map(([k]) => k === '*' ? AGENCIES.map(a => a.id) : [k.split(':')[0]]).flat());
       groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; });
     } else if (t < before - 0.001) { spotIds = null; holdUntil = 0; }
@@ -885,12 +898,12 @@ function frame(now) {
     document.querySelector('#ibar i').style.width = (mToU(t) * 100) + '%';
   } else if (playing && now >= holdUntil) {
     const before = t;
-    t = Math.min(END_M, t + dt * (t < SPLIT_M ? pace.early : pace.late));
+    t = Math.min(END_M, t + dt * speedAt(t, pace));
     const crossed = activeEvents().find(e => e.m > before && e.m <= t);
     if (crossed) {
-      t = crossed.m + 0.01; holdUntil = now + pace.read + pace.span + pace.after;
-      cascade = { at: now, read: pace.read, span: pace.span };
-      startEvent(crossed, now, pace.read, pace.span); spotIds = new Set(crossed.effects.map(([k]) => k === '*' ? AGENCIES.map(a => a.id) : [k.split(':')[0]]).flat());
+      t = crossed.m + 0.01; holdUntil = now + pace.read + pace.minSpan + pace.after;   // extended once the changes are counted
+      cascade = { at: now, read: pace.read, per: pace.per, minSpan: pace.minSpan, maxSpan: pace.maxSpan, after: pace.after };
+      startEvent(crossed, now, pace.read, pace.minSpan); spotIds = new Set(crossed.effects.map(([k]) => k === '*' ? AGENCIES.map(a => a.id) : [k.split(':')[0]]).flat());
       groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; });
     }
     const yr = Math.floor(t / 12);
