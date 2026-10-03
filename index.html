@@ -104,6 +104,7 @@
   button:hover, .seg label:hover { border-color: var(--muted); }
   button:focus-visible, input:focus-visible + label, input[type=range]:focus-visible { outline: 2px solid var(--newhire); outline-offset: 2px; }
   #play { min-width: 7.5em; }
+  #remember { user-select: none; -webkit-user-select: none; touch-action: none; }
   .track { flex: 1 1 320px; min-width: 0; position: relative; padding-bottom: 18px; }
   input[type=range] { width: 100%; accent-color: var(--star); margin: 0; }
   .ticks { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; font-family: var(--font-data); font-size: 10px; color: var(--muted); }
@@ -179,6 +180,7 @@
       <input type="radio" name="scn" id="scnRefill" value="refill" checked><label for="scnRefill">Refill every vacancy</label>
       <input type="radio" name="scn" id="scnHold" value="hold"><label for="scnHold">No refill</label>
     </div>
+    <button id="remember" type="button" title="Press and hold to see the sky as it was before the cuts">Hold to remember Sep 2024</button>
     <button id="gallery" type="button" title="Loops on its own. Press G or Esc to leave.">Gallery mode</button>
   </div>
   <details>
@@ -198,6 +200,7 @@
       <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark even when every other vacancy is refilled.</li>
       <li>"Refill every vacancy" is hypothetical. It shows how long full recovery would take in the best case: every empty position filled by July 2026, with no further cuts.</li>
       <li>How changes show: when an event happens, the caption appears first. Then the agencies it affects stay lit while the rest of the sky dims, and their stars change one at a time. A star that goes out flares and leaves an amber afterglow. A returning star arrives with a closing ring. New hires shift from blue to gold as they gain experience, and send out a small ring at every new year.</li>
+      <li>Memory: press and hold "Remember Sep 2024" to see the sky as it was before the cuts. When you let go, amber rings briefly mark the experience that has not come back. Gallery mode does this on its own at the end of every loop.</li>
       <li>Gallery mode plays the full timeline on a loop, pausing on each event. Add <code>#gallery</code> to the end of the address to open straight into it.</li>
     </ul>
   </details>
@@ -368,6 +371,7 @@ function simulate(t, scenario) {
   return { filled: filled / total, exp: exp / baseExp, years: exp };
 }
 const lum = s => s.on ? 0.12 + 0.88 * Math.pow(s.exp / MAX_EXP, 0.75) : 0;
+groups.forEach(g => g.stars.forEach(s => { s.b0 = 0.12 + 0.88 * Math.pow(s.exp0 / MAX_EXP, 0.75); }));
 
 // ---------- the sky ----------
 const cv = document.getElementById('sky'), ctx = cv.getContext('2d');
@@ -466,6 +470,9 @@ function drawStar(x, y, b, col, scale, now, tw) {
    - new hires shift from blue to gold as they gain experience, and pulse once at every new year */
 const OUT_MS = 7000, IN_MS = 1400, PULSE_MS = 1100;
 let spotIds = null, bgDim = 1, pulseAt = -1e9;
+/* The memory flash: mem (0–1) blends every star back to its Sep 2024 brightness. When it fades away,
+   echo leaves a faint amber ring wherever experience has not come back, like the outlines on a shadow board. */
+let mem = 0, echo = 0;
 
 function draw(now, dt) {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -495,15 +502,20 @@ function draw(now, dt) {
     }
     // figure lines mean filled positions: drawn when both ends are staffed, regardless of experience
     for (const [i, j] of g.links) {
-      const a = g.stars[i], b = g.stars[j], both = a.wasOn && b.wasOn;
-      ctx.strokeStyle = both ? 'rgba(170,188,230,0.26)' : 'rgba(170,188,230,0.06)';
-      ctx.lineWidth = 0.8; ctx.setLineDash(both ? [] : [2, 4]);
+      const a = g.stars[i], b = g.stars[j], both = a.wasOn && b.wasOn, f = both ? 1 : mem;
+      ctx.strokeStyle = `rgba(170,188,230,${(0.06 + 0.2 * f).toFixed(3)})`;
+      ctx.lineWidth = 0.8; ctx.setLineDash(f > 0.5 ? [] : [2, 4]);
       const dx = b.sx - a.sx, dy = b.sy - a.sy, L = Math.hypot(dx, dy) || 1, gap = 5 * g.scale;
       ctx.beginPath(); ctx.moveTo(a.sx + dx / L * gap, a.sy + dy / L * gap); ctx.lineTo(b.sx - dx / L * gap, b.sy - dy / L * gap); ctx.stroke();
     }
     ctx.setLineDash([]);
     for (const s of g.stars) {
-      if (s.disp < 0.02) {
+      const bb = s.disp + (s.b0 - s.disp) * mem;
+      if (echo > 0) {
+        const d = s.b0 - s.disp;
+        if (d > 0.06) { ctx.strokeStyle = hexA(C.ember, echo * Math.min(1, d * 1.8) * 0.75); ctx.lineWidth = 0.9; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.arc(s.sx, s.sy, (1.5 + s.b0 * 4.5) * g.scale, 0, 6.283); ctx.stroke(); ctx.setLineDash([]); }
+      }
+      if (bb < 0.02) {
         if (s.anchor) { ctx.strokeStyle = 'rgba(138,147,171,0.35)'; ctx.setLineDash([1.5, 2.5]); ctx.beginPath(); ctx.arc(s.sx, s.sy, 2.6 * g.scale, 0, 6.283); ctx.stroke(); ctx.setLineDash([]); }
         else { ctx.fillStyle = 'rgba(138,147,171,0.25)'; ctx.beginPath(); ctx.arc(s.sx, s.sy, 0.8, 0, 6.283); ctx.fill(); }
         continue;
@@ -511,9 +523,9 @@ function draw(now, dt) {
       const isNew = s.wasOn && s.hireM !== null && s.exp < s.exp0 - 0.01;
       if (isNew) {
         const f = Math.min(1, s.exp / s.exp0), col = mixHex(C.nh, C.star, f);
-        drawStar(s.sx, s.sy, Math.min(1, s.disp + pulse * 0.35), col, g.scale, now, s.tw);
+        drawStar(s.sx, s.sy, Math.min(1, bb + pulse * 0.35 * (1 - mem)), mixHex(col, C.star, mem), g.scale, now, s.tw);
         if (pulse > 0) { ctx.strokeStyle = hexA(col, pulse * 0.45); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(s.sx, s.sy, (3 + (1 - pulse) * 9) * g.scale, 0, 6.283); ctx.stroke(); }
-      } else drawStar(s.sx, s.sy, s.disp, C.star, g.scale, now, s.tw);
+      } else drawStar(s.sx, s.sy, bb, C.star, g.scale, now, s.tw);
     }
     if (!g.key.includes(':')) {
       // labels set like a star atlas: small italic, letterspaced, quiet. Brighter while in the spotlight.
@@ -547,7 +559,7 @@ function draw(now, dt) {
   }
   embers = embers.filter(e => now - e.t0 < (e.kind === 'out' ? OUT_MS : IN_MS));
   for (const e of embers) {
-    ctx.globalAlpha = e.g.focus;
+    ctx.globalAlpha = e.g.focus * (1 - mem);
     const ms = now - e.t0, sc = e.scale;
     if (e.kind === 'out') {
       // 1) a brief flare, 2) an amber ring that spreads, 3) an afterglow that lingers and fades into the empty outline
@@ -601,7 +613,7 @@ playBtn.addEventListener('click', () => { if (!playing && t >= END_M - 0.01) res
 document.querySelectorAll('input[name=scn]').forEach(r => r.addEventListener('change', () => { scenario = r.value; markEvents(); }));
 
 function restart() {
-  t = 0; holdUntil = 0; endAt = 0; embers = []; cascade = null; spotIds = null;
+  t = 0; holdUntil = 0; endAt = 0; embers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9;
   simulate(0, scenario);
   groups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; g.stars.forEach(s => { s.disp = lum(s); s.wasOn = s.lastOn = true; s.changeAt = 0; }); });
 }
@@ -619,7 +631,18 @@ function caption(t, res) {
 // Plays on a loop: slow through 2025, a pause on each event, faster through the years of regrowth,
 // a long hold at the end, then a fade to black and back to Sep 2024.
 // read: how long the caption shows before the stars change; span: how long the star-by-star cascade takes
-const GALLERY = { early: 0.75, late: 6, read: 2800, span: 4500, after: 4000, holdEnd: 9000 };
+const GALLERY = { early: 0.75, late: 6, read: 2800, span: 4500, after: 4000, holdEnd: 16000 };
+// The end of each gallery loop (ms after reaching 2045): hold, the memory rises, holds, fades, then the echo lingers.
+const MEMORY = { start: 2500, rise: 1500, hold: 4500, fall: 2200, echo: 5500 };
+const smooth = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+let memHeld = false, echoAt = -1e9;
+function galleryMemory(e) {
+  const M = MEMORY, up = M.start + M.rise, down = up + M.hold;
+  if (e < M.start) return 0;
+  if (e < up) return smooth((e - M.start) / M.rise);
+  if (e < down) return 1;
+  return 1 - smooth((e - down) / M.fall);
+}
 const NORMAL = { early: 1.3, late: 9, read: 500, span: 1800, after: 2000, holdEnd: 0 };
 let wakeTimer = 0;
 function setGallery(on) {
@@ -642,6 +665,15 @@ addEventListener('pointermove', () => {
   document.body.classList.add('awake'); clearTimeout(wakeTimer);
   wakeTimer = setTimeout(() => document.body.classList.remove('awake'), 2500);
 });
+
+// press and hold to remember
+const remember = $('remember');
+const holdOn = e => { e.preventDefault?.(); memHeld = true; };
+const holdOff = () => { if (memHeld) { memHeld = false; echoAt = performance.now(); } };
+remember.addEventListener('pointerdown', holdOn);
+['pointerup', 'pointerleave', 'pointercancel'].forEach(n => remember.addEventListener(n, holdOff));
+remember.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) holdOn(e); });
+remember.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') holdOff(); });
 
 // hover
 let hover = null;
@@ -705,11 +737,21 @@ function frame(now) {
   const res = simulate(t, scenario);
   scheduleChanges(now);
   draw(now, dt);
-  $('date').textContent = fmt(t);
+  if (gallery && endAt) {
+    const e = now - endAt, fallAt = MEMORY.start + MEMORY.rise + MEMORY.hold;
+    mem = galleryMemory(e);
+    echo = e < fallAt ? 0 : Math.max(0, 1 - Math.max(0, e - fallAt - MEMORY.fall) / MEMORY.echo) * smooth((e - fallAt) / MEMORY.fall);
+  } else {
+    mem += ((memHeld ? 1 : 0) - mem) * Math.min(1, dt * 3.5);
+    echo = memHeld ? 0 : Math.max(0, 1 - (now - echoAt) / 4500) * (1 - mem);
+  }
+  $('date').textContent = mem > 0.5 ? 'Sep 2024' : fmt(t);
   $('fillPos').style.width = (res.filled * 100) + '%'; $('pctPos').textContent = Math.round(res.filled * 100) + '%';
   $('fillExp').style.width = (res.exp * 100) + '%'; $('pctExp').textContent = Math.round(res.exp * 100) + '%';
   $('yrs').textContent = `≈ ${(Math.round((baseExp - res.years) / 1e4) / 100).toFixed(2)}M person-years of experience missing`;
-  const html = caption(t, res);
+  const html = mem > 0.5 ? `<small>Remember · Sep 2024</small>This was the sky before the cuts. Every position filled, every star at full brightness.`
+    : echo > 0.05 ? `<small>Back to ${fmt(t)}</small>The amber rings mark experience that has not come back. ${Math.round(res.exp * 100)}% has returned so far.`
+    : caption(t, res);
   if ($('caption').innerHTML !== html) $('caption').innerHTML = html;
   updateTip();
   requestAnimationFrame(frame);
