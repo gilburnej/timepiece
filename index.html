@@ -160,7 +160,7 @@
 <header>
   <div class="intro">
     <h1>Slow Light</h1>
-    <p>Eight federal agencies drawn as constellations. Each star is a share of an agency's workforce, and its brightness is that share's years of experience. A cut puts a star out in a day. A new hire relights it faintly, and it brightens by one year per year. The faint points around each constellation are its people, one point per hundred.</p>
+    <p>Eight federal agencies drawn as constellations. Each star is a share of an agency's workforce, and its brightness is that share's years of experience. A cut puts a star out in a day. A new hire relights it faintly, and it brightens by one year per year. The points of light around each constellation are its people, one point per 250.</p>
   </div>
   <div class="readout" aria-live="polite">
     <div class="date" id="date">Sep 2024</div>
@@ -182,7 +182,6 @@
       <div class="ticks" id="ticks"></div>
     </div>
     <button id="remember" type="button" title="Press and hold to see the sky as it was before the cuts">Hold to remember Sep 2024</button>
-    <button id="exposure" type="button" aria-pressed="false" title="All two years in one image, like a star-trail photograph. Press L.">Long exposure</button>
     <button id="gallery" type="button" title="Loops on its own. Press G or Esc to leave.">Gallery mode</button>
     <button id="install" type="button" title="Time moves only when the knob turns. Press I or Esc to leave.">Installation mode</button>
   </div>
@@ -193,8 +192,8 @@
       <span><i class="dot" style="background:var(--newhire);opacity:.6"></i>New hire (starts at zero, gains 1 yr/yr)</span>
       <span><i class="dot" style="border:1px dashed var(--muted)"></i>Empty position</span>
       <span><i class="dot" style="background:var(--ember)"></i>Moment of loss</span>
-      <span><i class="dot" style="background:var(--star);opacity:.45;width:3px;height:3px;border-radius:0"></i>One point = 100 employees</span>
-      <span><i class="dot" style="background:#9fb0d6;opacity:.5"></i>Shut down (unfunded; experience intact)</span>
+      <span><i class="dot" style="background:var(--star);opacity:.6;width:4px;height:4px"></i>One point = 250 employees</span>
+      <span><i class="dot" style="background:#6c7590"></i>Shut down (unfunded, unpaid; experience intact)</span>
     </div>
     <ul>
       <li><b>This is a sketch, not a dataset.</b> The figures are rough approximations from published reporting (GAO, Partnership for Public Service, Pew, agency announcements, and for ACF, tallies by former staff). Before you show it, check each one against OPM's workforce data and edit the <code>EVENTS</code> block in the source.</li>
@@ -203,11 +202,10 @@
       <li>Experience per star is estimated from an assumed average tenure for each agency. Probationary firings remove the newest stars. Deferred resignations and early retirements remove the most experienced. RIFs pick stars at random.</li>
       <li>Reinstated staff return at full brightness (the October 2025 RIFs, reversed in November; NIOSH reinstatements in January 2026). New hires, such as the IRS seasonal hires, return faint.</li>
       <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark.</li>
-      <li>Shutdowns: while an agency is unfunded, its stars dim and turn cool, and a day counter runs under its name. Furloughed and unpaid staff are still employees, so no experience is lost and the stars return as they were when funding comes back. The exception is people who quit, like the more than 1,100 TSA officers who left during the 76-day DHS shutdown in 2026. Two shutdowns are shown: Oct 1 – Nov 12, 2025 (government-wide, 43 days) and Feb 14 – Apr 30, 2026 (DHS only). A four-day partial lapse from Jan 31 to Feb 3, 2026 is mentioned in a caption but not drawn.</li>
+      <li>Shutdowns: while an agency is unfunded, its stars and people go dark grey and stop twinkling, because nothing is moving and no one is being paid. A day counter runs under its name. Furloughed and unpaid staff are still employees, so no experience is lost and the stars return as they were when funding comes back. The exception is people who quit, like the more than 1,100 TSA officers who left during the 76-day DHS shutdown in 2026. Two shutdowns are shown: Oct 1 – Nov 12, 2025 (government-wide, 43 days) and Feb 14 – Apr 30, 2026 (DHS only). A four-day partial lapse from Jan 31 to Feb 3, 2026 is mentioned in a caption but not drawn.</li>
       <li>The timeline ends at the present, October 2026. It shows no forecast. Funding is extended through Dec 11, 2026, so no third shutdown is drawn.</li>
       <li>How changes show: when an event happens, the caption appears first. Then the stars of each agency it affects change one at a time, and a count of the people lost or returned ticks up under its name. A star that goes out flares and leaves an amber afterglow. A returning star arrives with a closing ring. New hires shift from blue to gold as they gain experience, and send out a small ring at every new year.</li>
-      <li>The workforce: the faint points around each constellation are its people, one point per 100 employees (about 2,800 in all). They follow the same events as the constellation stars, at a finer grain, so a loss of 1,100 people puts out 11 points. The meters and the percentages under each name are computed from these points.</li>
-      <li>Long exposure: shows Sep 2024 to Oct 2026 in a single image, like a star-trail photograph. The sky turns slowly, so each star draws a trail from where it was to where it is now. A trail's brightness is that star's experience at that moment. Trails that end in an amber dot are people who left; faint blue trails are new hires; blue stretches are shutdowns. The dial along the bottom reads the same turn of the sky as a calendar, with a tick for each event. Gallery mode closes every loop with it. Inspired by Aaron Koblin's <i>Flight Patterns</i>, where every line is one real flight.</li>
+      <li>The workforce: the points of light around each constellation are its people, one point per 250 employees (about 1,100 in all). They follow the same events as the constellation stars, at a finer grain, so a loss of 1,100 people puts out about 4 points. The meters and the percentages under each name are computed from these points.</li>
       <li>Memory: press and hold "Remember Sep 2024" to see the sky as it was before the cuts. When you let go, amber rings briefly mark the experience that has not come back. Gallery mode does this on its own at the end of every loop.</li>
       <li>Installation mode is for a room with a knob: nothing moves on its own. Turning the knob moves through time in either direction, and holding the space bar (or the knob's push button) remembers Sep 2024. The knob can send arrow keys, + and −, or scroll-wheel movement. After three minutes untouched it fades back to Sep 2024 for the next visitor. Press I to enter, or add <code>#install</code> to the address.</li>
       <li>Gallery mode plays the full timeline on a loop, pausing on each event. Add <code>#gallery</code> to the end of the address to open straight into it.</li>
@@ -350,17 +348,17 @@ AGENCIES.forEach(a => {
 groups.forEach(g => { const r = rng(g.key + 'mix'), loose = g.stars.filter(s => !s.anchor); for (let i = loose.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [loose[i].exp0, loose[j].exp0] = [loose[j].exp0, loose[i].exp0]; } });
 const byKey = Object.fromEntries(groups.map(g => [g.key, g]));
 
-/* The workforce galaxy: one faint point per 100 employees, gathered in a loose cloud around each agency's
+/* The workforce galaxy: one point per 250 employees, gathered in a loose cloud around each agency's
    constellation (after Aaron Koblin's Flight Patterns, where every line is one real flight). The points follow
    the same events as the constellation stars at a finer grain, so losses visibly thin each agency's star field.
    The meters are computed from these points. */
-const PER_POINT = 100;
+const PER_POINT = 250;
 const dusts = AGENCIES.map(a => {
   const r = rng(a.id + 'dust'), n = Math.round(a.staff / PER_POINT);
   const stars = Array.from({ length: n }, () => {
-    const ang = r() * 6.283, rad = Math.abs(gauss(r)) * 0.44 + r() * 0.06;
+    const ang = r() * 6.283, rad = Math.abs(gauss(r)) * 0.5 + r() * 0.08;
     const e = a.tenure + (r() + r() + r() - 1.5) * a.tenure * 0.95;
-    return { ux: 0.5 + Math.cos(ang) * rad * 1.2, uy: 0.5 + Math.sin(ang) * rad * 0.95, exp0: Math.min(MAX_EXP, Math.max(0.5, e)), disp: 0, wasOn: true, tw: r() * 6.28 };
+    return { ux: 0.5 + Math.cos(ang) * rad * 1.4, uy: 0.5 + Math.sin(ang) * rad * 1.1, exp0: Math.min(MAX_EXP, Math.max(0.5, e)), disp: 0, wasOn: true, tw: r() * 6.28 };
   });
   return { key: a.id + '~people', agency: a, name: a.name, stars, links: [], noRefill: false, people: PER_POINT, isDust: true };
 });
@@ -421,9 +419,9 @@ allGroups.forEach(g => g.stars.forEach(s => { s.b0 = 0.12 + 0.88 * Math.pow(s.ex
 // ---------- the sky ----------
 const cv = document.getElementById('sky'), ctx = cv.getContext('2d');
 const tip = document.getElementById('tip'), fieldEl = document.getElementById('field');
-let W = 0, H = 0, DPR = 1, bg = null, twinklers = [], embers = [], pointEmbers = [], field = { x: 0, y: 0, w: 1, h: 1 };
+let W = 0, H = 0, DPR = 1, bg = null, twinklers = [], embers = [], pointEmbers = [];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const C = { shut: '#9fb0d6', star: css('--star'), nh: css('--newhire'), ember: css('--ember'), ink: css('--ink'), muted: css('--muted'), sky: css('--sky'), sky2: css('--sky-2') };
+const C = { shut: '#6c7590', shutText: '#a9b4cc', star: css('--star'), nh: css('--newhire'), ember: css('--ember'), ink: css('--ink'), muted: css('--muted'), sky: css('--sky'), sky2: css('--sky-2') };
 const TINTS = ['#c9d8ff', '#e4ebff', '#ffffff', '#fff4e2', '#ffe2bd', '#ffc99a'];
 
 // Paint the still part of the sky once per resize: gradient, Milky Way haze, dust lanes and thousands of faint stars.
@@ -478,7 +476,7 @@ function layout() {
   const wide = fw / fh >= 1.5, P = wide ? PLACES.wide : PLACES.tall;
   const unit = wide ? Math.min(fh, fw / 2.5) : Math.min(fw, fh / 1.9);
   for (const g of groups) {
-    const [px, py, sz, rot] = P[g.agency.id], size = sz * unit;
+    const [px, py, sz, rot] = P[g.agency.id], size = sz * unit * 1.12;
     const cx = fx + px * fw, cy = fy + py * fh, cs = Math.cos(rot), sn = Math.sin(rot);
     g.box = { cx, cy, size };
     g.scale = Math.max(0.7, Math.min(1.25, size / 220));
@@ -489,8 +487,6 @@ function layout() {
     const g = byKey[d.agency.id]; d.box = g.box;
     for (const s of d.stars) { s.sx = g.box.cx + (s.ux - 0.5) * g.box.size; s.sy = g.box.cy + (s.uy - 0.5) * g.box.size; }
   }
-  field = { x: fx, y: fy, w: fw, h: fh };
-  expDirty = true;
   paintBackground();
 }
 
@@ -538,9 +534,7 @@ function draw(now, dt) {
   }
   const gallery = document.body.classList.contains('gallery');
   const pulse = Math.max(0, 1 - (now - pulseAt) / PULSE_MS);
-  const live = 1 - expAmt;
-  ctx.globalAlpha = 1;
-  if (expAmt > 0.001 && expCanvas) { ctx.globalAlpha = expAmt; ctx.drawImage(expCanvas, 0, 0, W, H); }
+  const live = 1;
   // the workforce points
   for (const d of dusts) {
     const g = byKey[d.agency.id], vf = (g.veilAmt || 0) * (1 - mem);
@@ -552,20 +546,23 @@ function draw(now, dt) {
         if (s.wasOn && !s.on) pointEmbers.push({ x: s.sx, y: s.sy, t0: now });
         s.wasOn = s.on;
       }
-      const bb = (s.disp + (s.b0 - s.disp) * mem) * (1 - 0.3 * vf);
+      const bb = (s.disp + (s.b0 - s.disp) * mem) * (1 - 0.72 * vf);
       if (bb < 0.02) continue;
       let col = C.star;
       if (s.wasOn && s.hireM !== null && s.exp < s.exp0 - 0.01 && mem < 0.99) col = mixHex(C.nh, C.star, Math.max(mem, s.exp / s.exp0));
-      if (vf > 0.01) col = mixHex(col, C.shut, vf * 0.85);
-      const r = 0.45 + bb * 0.65;
-      ctx.fillStyle = hexA(col, 0.16 + bb * 0.5); ctx.fillRect(s.sx - r, s.sy - r, r * 2, r * 2);
+      if (vf > 0.01) col = mixHex(col, C.shut, vf * 0.9);
+      const r = 0.9 + bb * 1.3;
+      ctx.fillStyle = hexA(col, 0.28 + bb * 0.55); ctx.beginPath(); ctx.arc(s.sx, s.sy, r, 0, 6.283); ctx.fill();
     }
   }
-  pointEmbers = pointEmbers.filter(e => now - e.t0 < 1800);
+  // a point that goes out: an amber dot and a small ring that spreads and fades
+  pointEmbers = pointEmbers.filter(e => now - e.t0 < 2200);
   for (const e of pointEmbers) {
-    const p = (now - e.t0) / 1800;
-    ctx.globalAlpha = live * (1 - mem); ctx.fillStyle = hexA(C.ember, (1 - p) * 0.8);
-    ctx.fillRect(e.x - 1.1, e.y - 1.1, 2.2, 2.2);
+    const p = (now - e.t0) / 2200;
+    ctx.globalAlpha = live * (1 - mem);
+    ctx.fillStyle = hexA(C.ember, (1 - p) * 0.9); ctx.beginPath(); ctx.arc(e.x, e.y, 2 * (1 - p) + 0.6, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = hexA(C.ember, (1 - p) * 0.6); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(e.x, e.y, 2 + p * 10, 0, 6.283); ctx.stroke();
   }
   for (const g of groups) {
     const inSpot = !spotOn || spotIds.has(g.agency.id);
@@ -573,7 +570,8 @@ function draw(now, dt) {
     // shutdown: the agency's stars dim and cool while it is unfunded, then return as they were
     if (!g.veilAt || now >= g.veilAt) g.veilShown = g.veiled;
     g.veilAmt = (g.veilAmt || 0) + ((g.veilShown ? 1 : 0) - (g.veilAmt || 0)) * Math.min(1, dt * 1.8);
-    const vf = g.veilAmt * (1 - mem), cool = c => vf > 0.01 ? mixHex(c, C.shut, vf * 0.85) : c;
+    // a shutdown drains the light: stars go dim, grey and still (no twinkle) until funding returns
+    const vf = g.veilAmt * (1 - mem), cool = c => vf > 0.01 ? mixHex(c, C.shut, vf * 0.9) : c, still = vf > 0.5 ? 0 : now;
     ctx.globalAlpha = live;
     for (const s of g.stars) {
       if (s.changeAt && now < s.changeAt) continue;      // still waiting its turn in the cascade
@@ -587,14 +585,14 @@ function draw(now, dt) {
     // figure lines mean filled positions: drawn when both ends are staffed, regardless of experience
     for (const [i, j] of g.links) {
       const a = g.stars[i], b = g.stars[j], both = a.wasOn && b.wasOn, f = both ? 1 : mem;
-      ctx.strokeStyle = `rgba(170,188,230,${((0.06 + 0.2 * f) * (1 - 0.25 * vf)).toFixed(3)})`;
+      ctx.strokeStyle = `rgba(170,188,230,${((0.06 + 0.2 * f) * (1 - 0.65 * vf)).toFixed(3)})`;
       ctx.lineWidth = 0.8; ctx.setLineDash(f > 0.5 ? [] : [2, 4]);
       const dx = b.sx - a.sx, dy = b.sy - a.sy, L = Math.hypot(dx, dy) || 1, gap = 5 * g.scale * STAR_SIZE * 0.8;
       ctx.beginPath(); ctx.moveTo(a.sx + dx / L * gap, a.sy + dy / L * gap); ctx.lineTo(b.sx - dx / L * gap, b.sy - dy / L * gap); ctx.stroke();
     }
     ctx.setLineDash([]);
     for (const s of g.stars) {
-      const bb = (s.disp + (s.b0 - s.disp) * mem) * (1 - 0.3 * vf);
+      const bb = (s.disp + (s.b0 - s.disp) * mem) * (1 - 0.72 * vf);
       if (echo > 0) {
         const d = s.b0 - s.disp;
         if (d > 0.06) { ctx.strokeStyle = hexA(C.ember, echo * Math.min(1, d * 1.8) * 0.75); ctx.lineWidth = 0.9; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.arc(s.sx, s.sy, (1.5 + s.b0 * 4.5) * g.scale * STAR_SIZE, 0, 6.283); ctx.stroke(); ctx.setLineDash([]); }
@@ -606,9 +604,9 @@ function draw(now, dt) {
       const isNew = s.wasOn && s.hireM !== null && s.exp < s.exp0 - 0.01;
       if (isNew) {
         const f = Math.min(1, s.exp / s.exp0), col = mixHex(C.nh, C.star, f);
-        drawStar(s.sx, s.sy, Math.min(1, bb + pulse * 0.35 * (1 - mem)), cool(mixHex(col, C.star, mem)), g.scale, now, s.tw);
+        drawStar(s.sx, s.sy, Math.min(1, bb + pulse * 0.35 * (1 - mem) * (1 - vf)), cool(mixHex(col, C.star, mem)), g.scale, still, s.tw);
         if (pulse > 0) { ctx.strokeStyle = hexA(col, pulse * 0.45); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(s.sx, s.sy, (3 + (1 - pulse) * 9) * g.scale * STAR_SIZE, 0, 6.283); ctx.stroke(); }
-      } else drawStar(s.sx, s.sy, bb, cool(C.star), g.scale, now, s.tw);
+      } else drawStar(s.sx, s.sy, bb, cool(C.star), g.scale, still, s.tw);
     }
     ctx.globalAlpha = 1;
     if (!g.key.includes(':')) {
@@ -620,14 +618,14 @@ function draw(now, dt) {
       ctx.fillText(g.name, g.box.cx, g.labelY);
       if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
       let ly = g.labelY + 15;
-      if (g.veiled && g.veilShown && mem < 0.5 && expAmt < 0.5) {
+      if (g.veiled && g.veilShown && mem < 0.5) {
         // a day counter while the agency is shut down
         const day = Math.max(1, Math.floor((t - g.veilStart) * 30.44) + 1);
-        ctx.font = `500 11px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = hexA(C.shut, 0.9 * Math.min(1, vf * 1.5));
-        ctx.fillText(`Shut down · day ${day}`, g.box.cx, ly); ly += 14;
+        ctx.font = `500 11px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = hexA(C.shutText, 0.95 * Math.min(1, vf * 1.5));
+        ctx.fillText(`Shut down · day ${day} · unpaid`, g.box.cx, ly); ly += 14;
       }
       const ex = byKey[g.key + ':ssbg'], ppl = evPeople[g.agency.id], prog = smooth((now - spotAt - evRead) / evSpan);
-      if (spotOn && inSpot && ppl && prog > 0 && expAmt < 0.5) {
+      if (spotOn && inSpot && ppl && prog > 0) {
         // a running count of the people this event moved, ticking up while the stars change
         const parts = [];
         if (ppl.out) parts.push(`−${fmtPeople(ppl.out * prog)} people`);
@@ -636,7 +634,7 @@ function draw(now, dt) {
         ctx.font = `500 11px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = ppl.out ? C.ember : C.nh;
         ctx.fillText(parts.join(' · '), g.box.cx, ly); ly += 14;
       }
-      if (!gallery && expAmt < 0.5) {
+      if (!gallery) {
         const dg = byDust[g.agency.id];
         ctx.font = `10px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = 'rgba(138,147,171,0.75)';
         ctx.fillText(`${Math.round(dg.filled / dg.stars.length * 100)}% filled · ${Math.round(dg.exp / dg.base * 100)}% exp.`, g.box.cx, ly);
@@ -673,75 +671,6 @@ function draw(now, dt) {
 }
 function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${Math.max(0, a).toFixed(3)})`; }
 
-// ---------- long exposure ----------
-/* Two years in one image, like star-trail photography: the sky turns slowly about a pole above the field, so each
-   star draws an arc from where it was in Sep 2024 to where it is today. Brightness along the trail is that star's
-   experience at that moment. A trail that stops (marked amber) is a person who left; one that starts faint and blue
-   is a new hire; shutdowns show as cool blue stretches. Rendered once, then cross-faded in. */
-const EXPO = { samples: 150, trail: 0.21 };      // trail: length of a mid-field trail, as a share of the field's smaller side
-let exposure = false, expAmt = 0, expCanvas = null, expDirty = true;
-function exposurePole() {
-  // the pole sits above the field; the sky turns just far enough that mid-field trails have a set length on any screen
-  const m = Math.min(field.w, field.h), y = field.y - m * 1.15, mid = field.y + field.h / 2 - y;
-  return { x: field.x + field.w * 0.5, y, sweep: EXPO.trail * m / mid };
-}
-function renderExposure() {
-  expCanvas = document.createElement('canvas'); expCanvas.width = W * DPR; expCanvas.height = H * DPR;
-  const x = expCanvas.getContext('2d'); x.scale(DPR, DPR);
-  const P = exposurePole(), K = EXPO.samples;
-  const at = (sx, sy, k) => { const a = (1 - k / K) * P.sweep, dx = sx - P.x, dy = sy - P.y, c = Math.cos(a), sn = Math.sin(a); return [P.x + dx * c - dy * sn, P.y + dx * sn + dy * c]; };
-  const paths = new Map(), ends = [];
-  const seg = (style, x1, y1, x2, y2) => { let p = paths.get(style); if (!p) paths.set(style, p = new Path2D()); p.moveTo(x1, y1); p.lineTo(x2, y2); };
-  for (let k = 0; k <= K; k++) {
-    simulate(k / K * END_M, scenario);
-    for (const g of allGroups) {
-      if (g.isDust && k % 3 && k !== K) continue;     // the points are sampled more coarsely; there are thousands
-      for (const s of g.stars) {
-        const b = lum(s), [px, py] = at(s.sx, s.sy, k), last = s._trail;
-        const isNew = s.hireM !== null && s.exp < s.exp0 - 0.01;
-        if (last && last.b > 0.01 && b > 0.01) {
-          const q = Math.round(b * 8) / 8, col = g.veiled ? C.shut : isNew ? C.nh : C.star;
-          const w = g.isDust ? 0.7 : (0.5 + q * 2.4) * g.scale, a = g.isDust ? 0.05 + q * 0.16 : 0.22 + q * 0.6;
-          seg(`${col}|${a.toFixed(3)}|${w.toFixed(2)}`, last.x, last.y, px, py);
-        } else if (last && last.b > 0.01 && b <= 0.01) ends.push([last.x, last.y, g.isDust ? 0.9 : 2.2 * g.scale]);
-        s._trail = { x: px, y: py, b };
-      }
-    }
-  }
-  x.globalCompositeOperation = 'lighter'; x.lineCap = 'round';
-  for (const [style, path] of paths) { const [col, a, w] = style.split('|'); x.strokeStyle = hexA(col, +a); x.lineWidth = +w; x.stroke(path); }
-  x.globalCompositeOperation = 'source-over';
-  for (const [ex, ey, r] of ends) { x.fillStyle = hexA(C.ember, r > 1 ? 0.85 : 0.55); x.beginPath(); x.arc(ex, ey, r, 0, 6.283); x.fill(); }
-  // today's stars at the head of each trail
-  for (const g of groups) for (const s of g.stars) if (s._trail.b > 0.01) { x.fillStyle = hexA(C.star, 0.95); x.beginPath(); x.arc(s.sx, s.sy, (0.6 + s._trail.b * 1.6) * g.scale, 0, 6.283); x.fill(); }
-  // the dial: the same turn of the sky, read as a calendar along the bottom of the field
-  const R = field.y + field.h + 6 - P.y, ang = m => Math.PI / 2 + (1 - m / END_M) * P.sweep;
-  x.strokeStyle = 'rgba(160,178,220,0.35)'; x.lineWidth = 1;
-  x.beginPath(); x.arc(P.x, P.y, R, ang(END_M), ang(0)); x.stroke();
-  for (const ev of EVENTS.filter(e => e.effects.some(f => f[1] === 'shutdown'))) {
-    const end = EVENTS.find(e => e.m > ev.m && e.effects.some(f => f[1] === 'reopen'));
-    x.strokeStyle = hexA(C.shut, 0.8); x.lineWidth = 3;
-    x.beginPath(); x.arc(P.x, P.y, R, ang(end.m), ang(ev.m)); x.stroke();
-  }
-  for (const ev of activeEvents()) {
-    const a = ang(ev.m), c = Math.cos(a), sn = Math.sin(a);
-    x.strokeStyle = hexA(C.ember, 0.9); x.lineWidth = 1.2;
-    x.beginPath(); x.moveTo(P.x + c * (R - 5), P.y + sn * (R - 5)); x.lineTo(P.x + c * (R + 5), P.y + sn * (R + 5)); x.stroke();
-  }
-  x.font = '10px "IBM Plex Mono", ui-monospace, monospace'; x.fillStyle = 'rgba(138,147,171,0.9)';
-  for (const [label, m, align, dx] of [[fmt(0), 0, 'right', -8], [fmt(END_M), END_M, 'left', 8]]) {
-    const a = ang(m); x.textAlign = align; x.fillText(label, P.x + Math.cos(a) * R + dx, P.y + Math.sin(a) * R + 4);
-  }
-  allGroups.forEach(g => g.stars.forEach(s => { delete s._trail; }));
-  simulate(t, scenario);                          // put the live sky back
-  expDirty = false;
-}
-function setExposure(on) {
-  exposure = on; $('exposure').setAttribute('aria-pressed', on);
-  $('exposure').textContent = on ? 'Back to the live sky' : 'Long exposure';
-  if (on) setPlaying(false);
-}
-
 // ---------- timeline ----------
 const $ = id => document.getElementById(id);
 const scrub = $('scrub'), playBtn = $('play');
@@ -767,10 +696,10 @@ scrub.addEventListener('input', () => {
   t = uToM(scrub.value / 1000); holdUntil = 0; spotIds = null;
   allGroups.forEach(g => { g.veilAt = 0; g.stars.forEach(s => { s.changeAt = 0; }); });
 });
-playBtn.addEventListener('click', () => { if (exposure) setExposure(false); if (!playing && t >= END_M - 0.01) restart(); setPlaying(!playing); });
+playBtn.addEventListener('click', () => { if (!playing && t >= END_M - 0.01) restart(); setPlaying(!playing); });
 
 function restart() {
-  t = 0; tTarget = 0; holdUntil = 0; endAt = 0; embers = []; pointEmbers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9; expAmt = 0;
+  t = 0; tTarget = 0; holdUntil = 0; endAt = 0; embers = []; pointEmbers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9;
   simulate(0, scenario);
   allGroups.forEach(g => { g.liveOut = g.liveIn = g.liveNew = 0; g.lastVeiled = g.veilShown = false; g.veilAmt = 0; g.veilAt = 0; g.stars.forEach(s => { s.disp = lum(s); s.wasOn = s.lastOn = true; s.changeAt = 0; }); });
 }
@@ -787,9 +716,7 @@ function caption(t, res) {
 // Plays on a loop: slow through 2025, a pause on each event, faster through the years of regrowth,
 // a long hold at the end, then a fade to black and back to Sep 2024.
 // read: how long the caption shows before the stars change; span: how long the star-by-star cascade takes
-const GALLERY = { early: 0.75, late: 2.5, read: 2800, span: 4500, after: 4000, holdEnd: 29000 };
-// after the memory and its echo, the loop closes on the long exposure (ms after reaching the present)
-const GALLERY_EXPOSURE = { start: 16500, rise: 2500 };
+const GALLERY = { early: 0.75, late: 2.5, read: 2800, span: 4500, after: 4000, holdEnd: 16000 };
 // The end of each gallery loop (ms after reaching the present): hold, the memory rises, holds, fades, then the echo lingers.
 const MEMORY = { start: 2500, rise: 1500, hold: 4500, fall: 2200, echo: 5500 };
 const smooth = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
@@ -814,7 +741,6 @@ function setGallery(on) {
   requestAnimationFrame(layout);
 }
 $('gallery').addEventListener('click', () => setGallery(true));
-$('exposure').addEventListener('click', () => setExposure(!exposure));
 
 // ---------- installation mode: a knob moves time ----------
 // KNOB.step: how far one click of the knob moves along the timeline (share of the whole). Raise it for a faster knob.
@@ -855,7 +781,6 @@ addEventListener('keydown', e => {
   if (e.target.matches?.('input, textarea')) return;
   if (e.key === 'g' || e.key === 'G') setGallery(!document.body.classList.contains('gallery'));
   if (e.key === 'i' || e.key === 'I') setInstall(!installMode);
-  if (e.key === 'l' || e.key === 'L') setExposure(!exposure);
   if (e.key === 'Escape' && document.body.classList.contains('gallery')) setGallery(false);
 });
 addEventListener('pointermove', () => {
@@ -983,16 +908,11 @@ function frame(now) {
     mem += ((memHeld ? 1 : 0) - mem) * Math.min(1, dt * 3.5);
     echo = memHeld ? 0 : Math.max(0, 1 - (now - echoAt) / 4500) * (1 - mem);
   }
-  const expTarget = exposure || (gallery && endAt && now - endAt > GALLERY_EXPOSURE.start) ? 1 : 0;
-  if (expTarget && (expDirty || !expCanvas)) renderExposure();
-  expAmt += (expTarget - expAmt) * Math.min(1, dt * (gallery ? 1000 / GALLERY_EXPOSURE.rise : 3));
-  if (expAmt < 0.002 && !expTarget) expAmt = 0;
-  $('date').textContent = expAmt > 0.5 ? `${fmt(0)} – ${fmt(END_M)}` : mem > 0.5 ? 'Sep 2024' : fmt(t);
+  $('date').textContent = mem > 0.5 ? 'Sep 2024' : fmt(t);
   $('fillPos').style.width = (res.filled * 100) + '%'; $('pctPos').textContent = Math.round(res.filled * 100) + '%';
   $('fillExp').style.width = (res.exp * 100) + '%'; $('pctExp').textContent = Math.round(res.exp * 100) + '%';
   $('yrs').textContent = `≈ ${(Math.round((baseExp - res.years) / 1e4) / 100).toFixed(2)}M person-years of experience missing`;
-  const html = expAmt > 0.5 ? `<small>Long exposure · ${fmt(0)} – ${fmt(END_M)}</small>Two years in one image. Each trail is a star's experience over time. Trails that end in amber are people who left. Faint blue trails are new hires. Blue stretches are shutdowns.`
-    : mem > 0.5 ? `<small>Remember · Sep 2024</small>This was the sky before the cuts. Every position filled, every star at full brightness.`
+  const html = mem > 0.5 ? `<small>Remember · Sep 2024</small>This was the sky before the cuts. Every position filled, every star at full brightness.`
     : echo > 0.05 ? `<small>Back to ${fmt(t)}</small>The amber rings mark experience that is gone. Today the sky holds ${Math.round(res.exp * 100)}% of what it had.`
     : caption(t, res);
   if ($('caption').innerHTML !== html) $('caption').innerHTML = html;
