@@ -181,11 +181,6 @@
       <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Timeline">
       <div class="ticks" id="ticks"></div>
     </div>
-    <span class="seg-title">After Jan 2026</span>
-    <div class="seg" role="radiogroup" aria-label="Scenario after January 2026">
-      <input type="radio" name="scn" id="scnRefill" value="refill" checked><label for="scnRefill">Refill every vacancy</label>
-      <input type="radio" name="scn" id="scnHold" value="hold"><label for="scnHold">No refill</label>
-    </div>
     <button id="remember" type="button" title="Press and hold to see the sky as it was before the cuts">Hold to remember Sep 2024</button>
     <button id="gallery" type="button" title="Loops on its own. Press G or Esc to leave.">Gallery mode</button>
     <button id="install" type="button" title="Time moves only when the knob turns. Press I or Esc to leave.">Installation mode</button>
@@ -205,9 +200,9 @@
       <li>The lines between stars show positions. A line is drawn when both of its stars are filled, so the shape returns as soon as people are hired. Brightness shows experience, which returns one year at a time.</li>
       <li>Experience per star is estimated from an assumed average tenure for each agency. Probationary firings remove the newest stars. Deferred resignations and early retirements remove the most experienced. RIFs pick stars at random.</li>
       <li>Reinstated staff return at full brightness (the October 2025 RIFs, reversed in November; NIOSH reinstatements in January 2026). New hires, such as the IRS seasonal hires, return faint.</li>
-      <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark even when every other vacancy is refilled.</li>
+      <li>The ACF Social Services Block Grant team is the small separate triangle. Everyone with that expertise left, so it stays dark.</li>
       <li>Shutdowns: while an agency is unfunded, its stars dim and turn cool, and a day counter runs under its name. Furloughed and unpaid staff are still employees, so no experience is lost and the stars return as they were when funding comes back. The exception is people who quit, like the more than 1,100 TSA officers who left during the 76-day DHS shutdown in 2026. Two shutdowns are shown: Oct 1 – Nov 12, 2025 (government-wide, 43 days) and Feb 14 – Apr 30, 2026 (DHS only). A four-day partial lapse from Jan 31 to Feb 3, 2026 is mentioned in a caption but not drawn.</li>
-      <li>The timeline ends in January 2030. "Refill every vacancy" is hypothetical. It shows how long full recovery would take in the best case: every empty position filled by July 2026, with no further cuts.</li>
+      <li>The timeline ends at the present, October 2026. It shows no forecast. Funding is extended through Dec 11, 2026, so no third shutdown is drawn.</li>
       <li>How changes show: when an event happens, the caption appears first. Then the stars of each agency it affects change one at a time, and a count of the people lost or returned ticks up under its name. A star that goes out flares and leaves an amber afterglow. A returning star arrives with a closing ring. New hires shift from blue to gold as they gain experience, and send out a small ring at every new year.</li>
       <li>Memory: press and hold "Remember Sep 2024" to see the sky as it was before the cuts. When you let go, amber rings briefly mark the experience that has not come back. Gallery mode does this on its own at the end of every loop.</li>
       <li>Installation mode is for a room with a knob: nothing moves on its own. Turning the knob moves through time in either direction, and holding the space bar (or the knob's push button) remembers Sep 2024. The knob can send arrow keys, + and −, or scroll-wheel movement. After three minutes untouched it fades back to Sep 2024 for the next visitor. Press I to enter, or add <code>#install</code> to the address.</li>
@@ -277,9 +272,6 @@ const EVENTS = [
   { id: 'dhsend', date: '2026-04-30', label: 'DHS shutdown ends',
     text: 'After 76 days, a new record, DHS is funded again. More than 1,100 TSA officers quit while working without pay, and their experience left with them.',
     effects: [ ['tsa','reopen'], ['tsa','cut',.018,'random'] ] },
-  { id: 'refill', date: '2026-07-01', label: 'Hypothetical: every vacancy refilled', scenario: 'refill',
-    text: 'Suppose every empty position were filled tomorrow. The shapes return at once. The light does not.',
-    effects: [ ['*','refill'] ] },
 ];
 /* ============================ end data ============================ */
 
@@ -293,8 +285,8 @@ const PLACES = {
 };
 
 const START = new Date(2024, 8, 1);           // Sep 2024
-const END_M = 64;                             // months -> Jan 2030
-const SPLIT_M = 22, SPLIT_U = 0.62;           // first 62% of the slider covers Sep 2024–Jul 2026
+const END_M = 25;                             // months -> Oct 2026, the present. No forecast past it.
+const SPLIT_M = END_M;                        // (kept for pacing: the whole timeline plays at the 'early' speed)
 const STARS = 12, MAX_EXP = 30;
 const STAR_SIZE = 2.1;                        // how much larger than a realistic star each star is drawn
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -621,16 +613,14 @@ function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >
 // ---------- timeline ----------
 const $ = id => document.getElementById(id);
 const scrub = $('scrub'), playBtn = $('play');
-const uToM = u => u < SPLIT_U ? u / SPLIT_U * SPLIT_M : SPLIT_M + (u - SPLIT_U) / (1 - SPLIT_U) * (END_M - SPLIT_M);
-const mToU = m => m < SPLIT_M ? m / SPLIT_M * SPLIT_U : SPLIT_U + (m - SPLIT_M) / (END_M - SPLIT_M) * (1 - SPLIT_U);
-let t = 0, playing = false, scenario = 'refill', last = performance.now(), holdUntil = 0, endAt = 0, cascade = null, lastYear = 0;
+const uToM = u => u * END_M;
+const mToU = m => m / END_M;
+let t = 0, playing = false, scenario = 'actual', last = performance.now(), holdUntil = 0, endAt = 0, cascade = null, lastYear = 0;
 
 const ticks = $('ticks');
-[['Sep 2024', 0], ['Jan 2025', 4], ['Jan 2026', 16], ['2027', 28], ['2028', 40], ['2029', 52], ['2030', 64]].forEach(([l, m]) => {
+[['Sep 2024', 0], ['Jan 2025', 4], ['Jan 2026', 16], ['Oct 2026', 25]].forEach(([l, m]) => {
   const s = document.createElement('span'); s.textContent = l; s.style.left = (mToU(m) * 100) + '%';
-  if (l === 'Jan 2025') return;
-  if (l === '2027' || l === '2029') s.className = 'minor';
-  if (l === '2030') s.className = 'end';
+  if (l === 'Oct 2026') s.className = 'end';
   ticks.appendChild(s);
 });
 function activeEvents() { return EVENTS.filter(e => !e.scenario || e.scenario === scenario); }
@@ -646,7 +636,6 @@ scrub.addEventListener('input', () => {
   groups.forEach(g => { g.veilAt = 0; g.stars.forEach(s => { s.changeAt = 0; }); });
 });
 playBtn.addEventListener('click', () => { if (!playing && t >= END_M - 0.01) restart(); setPlaying(!playing); });
-document.querySelectorAll('input[name=scn]').forEach(r => r.addEventListener('change', () => { scenario = r.value; markEvents(); }));
 
 function restart() {
   t = 0; tTarget = 0; holdUntil = 0; endAt = 0; embers = []; cascade = null; spotIds = null; mem = 0; echo = 0; echoAt = -1e9;
@@ -657,10 +646,9 @@ function restart() {
 function caption(t, res) {
   const evs = activeEvents().filter(e => e.m <= t), ev = evs.at(-1);
   if (t < 4.5) return `<small>Sep 2024</small>Every position filled. The brightest stars hold decades of experience.` + (installMode ? `<span class="hint">Turn the dial to move through time · Press and hold to remember</span>` : '');
-  if (ev && (t - ev.m < 3.5 || ev.id !== 'refill' && t < SPLIT_M + 2)) return `<small>${fmt(ev.m)} · ${ev.label}</small>${ev.text}`;
-  const yrs = Math.floor((t - EVENTS[0].m) / 12);
-  if (scenario === 'refill' && t > SPLIT_M + 2) return `<small>${yrs} years after the first cuts</small>Positions ${Math.round(res.filled * 100)}% filled. Experience back to ${Math.round(res.exp * 100)}%. New hires gain one year of experience per year, and no faster.`;
-  return `<small>${yrs} years after the first cuts</small>With no rehiring, the empty outlines stay empty. Experience holds at ${Math.round(res.exp * 100)}% of where it was.`;
+  if (t >= END_M - 0.6) return `<small>${fmt(END_M)} · Today</small>Positions ${Math.round(res.filled * 100)}% filled. The sky holds ${Math.round(res.exp * 100)}% of the experience it had in September 2024.`;
+  if (ev) return `<small>${fmt(ev.m)} · ${ev.label}</small>${ev.text}`;
+  return '';
 }
 
 // ---------- gallery mode ----------
@@ -668,7 +656,7 @@ function caption(t, res) {
 // a long hold at the end, then a fade to black and back to Sep 2024.
 // read: how long the caption shows before the stars change; span: how long the star-by-star cascade takes
 const GALLERY = { early: 0.75, late: 2.5, read: 2800, span: 4500, after: 4000, holdEnd: 16000 };
-// The end of each gallery loop (ms after reaching 2030): hold, the memory rises, holds, fades, then the echo lingers.
+// The end of each gallery loop (ms after reaching the present): hold, the memory rises, holds, fades, then the echo lingers.
 const MEMORY = { start: 2500, rise: 1500, hold: 4500, fall: 2200, echo: 5500 };
 const smooth = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
 let memHeld = false, echoAt = -1e9;
@@ -864,7 +852,7 @@ function frame(now) {
   $('fillExp').style.width = (res.exp * 100) + '%'; $('pctExp').textContent = Math.round(res.exp * 100) + '%';
   $('yrs').textContent = `≈ ${(Math.round((baseExp - res.years) / 1e4) / 100).toFixed(2)}M person-years of experience missing`;
   const html = mem > 0.5 ? `<small>Remember · Sep 2024</small>This was the sky before the cuts. Every position filled, every star at full brightness.`
-    : echo > 0.05 ? `<small>Back to ${fmt(t)}</small>The amber rings mark experience that has not come back. ${Math.round(res.exp * 100)}% has returned so far.`
+    : echo > 0.05 ? `<small>Back to ${fmt(t)}</small>The amber rings mark experience that is gone. Today the sky holds ${Math.round(res.exp * 100)}% of what it had.`
     : caption(t, res);
   if ($('caption').innerHTML !== html) $('caption').innerHTML = html;
   updateTip();
