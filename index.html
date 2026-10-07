@@ -762,8 +762,9 @@ function galleryMemory(e, M = MEMORY) {
 /* Planetarium: no captions while the sky plays, so events pause only briefly; the words come at the end.
    REVEAL (ms after reaching the present): a silent hold, the agency names fade in one by one, two lines say
    what the lights are, the sky returns to Sep 2024 and comes back to today, then a closing line. */
-const REVEAL = { names: 2500, nameStep: 650, line1: 9500, line2: 14500, memory: 20000, rise: 1800, hold: 5000, fall: 2200, echo: 7000, last: 37000, end: 45000 };
-const PLANET = { ...GALLERY, read: 1200, after: 3500, holdEnd: REVEAL.end };
+const REVEAL = { names: 1200, nameStep: 400, line1: 5000, line2: 8800, memory: 12600, rise: 1500, hold: 3800, fall: 1800, echo: 5500, last: 25000, end: 31000 };
+// planetarium plays brisker than gallery mode: quiet months fly by, each event starts at once and resolves quickly
+const PLANET = { quiet: 6, near: 1.4, shutdownDays: 12, read: 350, per: 22, minSpan: 1600, maxSpan: 4500, after: 1600, holdEnd: REVEAL.end };
 const PLANET_MEMORY = { start: REVEAL.memory, rise: REVEAL.rise, hold: REVEAL.hold, fall: REVEAL.fall, echo: REVEAL.echo };
 let planet = false, revealE = -1;
 function revealCaption(e, res) {
@@ -957,7 +958,7 @@ function frame(now) {
         if (!endAt) endAt = now;
         if (now - endAt > pace.holdEnd) {
           $('fade').style.opacity = 1;
-          if (now - endAt > pace.holdEnd + 2200) { restart(); $('fade').style.opacity = 0; holdUntil = now + 2500; }
+          if (now - endAt > pace.holdEnd + 2200) { restart(); $('fade').style.opacity = 0; holdUntil = now + (planet ? 800 : 2500); }
         }
       } else setPlaying(false);
     }
